@@ -10,10 +10,10 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/"
-      className={cn("inline-flex items-center gap-1.5 rounded-md text-ink", className)}
+      className={cn("inline-flex shrink-0 items-center gap-1.5 rounded-md text-ink", className)}
       aria-label="Yours Crafts Woman — home"
     >
-      <span className="font-serif text-xl leading-none font-semibold tracking-tight whitespace-nowrap sm:text-2xl">
+      <span className="font-serif text-[1.15rem] leading-none font-semibold tracking-tight whitespace-nowrap min-[400px]:text-xl sm:text-2xl lg:text-[1.75rem]">
         Yours Crafts Woman
       </span>
       <HandDoodle className="size-6 shrink-0 sm:size-7" />

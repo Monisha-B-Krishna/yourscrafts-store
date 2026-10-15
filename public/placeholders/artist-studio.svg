@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Illustrated placeholder of a painting corner with an easel">
+  <rect width="600" height="600" fill="#FFF1E8"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".8"/>
+    <path d="M300 120 L210 520 M300 120 L390 520 M300 120 L300 540" stroke="#8A6A55" stroke-width="12" stroke-linecap="round"/>
+    <rect x="190" y="170" width="220" height="200" rx="6" fill="#fff" stroke="#111" stroke-width="6"/>
+    <circle cx="350" cy="225" r="26" fill="#F4A27A"/>
+    <path d="M194 330 q50 -70 104 -16 q50 -50 108 6 v46 h-212z" fill="#8FA98B" opacity=".85"/>
+    <rect x="180" y="380" width="240" height="14" rx="4" fill="#8A6A55"/>
+    <rect x="455" y="400" width="56" height="74" rx="10" fill="#F4A27A"/>
+    <path d="M468 400 l-10 -60 M482 400 l2 -70 M496 400 l14 -58" stroke="#5A3A2E" stroke-width="6" stroke-linecap="round"/>
+</svg>

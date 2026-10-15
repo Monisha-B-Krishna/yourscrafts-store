@@ -3,10 +3,10 @@ import Link from "next/link";
 import { FiltersSheet } from "@/components/shop/filters-sheet";
 import { Pagination } from "@/components/shop/pagination";
 import { ProductGrid } from "@/components/shop/product-card";
-import { ShopFilters } from "@/components/shop/shop-filters";
+import { ActiveFilters, ShopFilters } from "@/components/shop/shop-filters";
 import { SortSelect } from "@/components/shop/sort-select";
 import { getCategories, listProducts } from "@/lib/catalog";
-import { parseShopParams } from "@/lib/shop-query";
+import { parseShopParams, shopHref } from "@/lib/shop-query";
 import { cn } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -56,7 +56,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
         <ul className="flex gap-2 pb-2">
           <li>
             <Link
-              href="/shop"
+              href={shopHref({ ...query, category: undefined })}
               aria-current={!query.category ? "page" : undefined}
               className={cn(chipClass, !query.category ? "border-ink bg-ink text-cream" : "bg-white hover:bg-peach-soft")}
             >
@@ -68,7 +68,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
             return (
               <li key={c.id}>
                 <Link
-                  href={`/shop?category=${c.slug}`}
+                  href={shopHref({ ...query, category: c.slug })}
                   aria-current={active ? "page" : undefined}
                   className={cn(chipClass, active ? "border-ink bg-ink text-cream" : "bg-white hover:bg-peach-soft")}
                 >
@@ -83,7 +83,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
       <div className="mt-6 grid gap-10 lg:grid-cols-[240px_1fr]">
         <aside aria-label="Filters" className="hidden lg:block">
           <div className="sticky top-28 rounded-2xl bg-white/70 p-5 ring-1 ring-border">
-            <ShopFilters categories={categories} query={query} idPrefix="desktop" />
+            <ShopFilters categories={categories} query={query} idPrefix="desktop" autoSubmit />
           </div>
         </aside>
 
@@ -96,6 +96,8 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
               <SortSelect value={query.sort} />
             </div>
           </div>
+
+          <ActiveFilters query={query} categories={categories} />
 
           {items.length > 0 ? (
             <ProductGrid products={items} priorityCount={4} />

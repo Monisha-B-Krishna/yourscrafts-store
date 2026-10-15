@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
 import { buildDemoCollections, buildDemoProducts, demoCategories } from "@/lib/seed/demo";
+import { searchInMemory } from "@/lib/search";
 import { DEFAULT_SETTINGS, parseSettingsRows, type StoreSettings } from "@/lib/settings";
 import { applyProductQuery, type ProductQuery } from "@/lib/shop-query";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -13,7 +14,7 @@ import type { Category, Collection, Product } from "@/lib/types";
  * before any accounts are set up.
  */
 
-const PRODUCT_COLUMNS = `
+export const PRODUCT_COLUMNS = `
   id, name, slug, description, category_id, type, price, sale_price, stock, tags,
   is_featured, sales_count, dimensions, created_at,
   images:product_images (url, alt, sort_order),
@@ -21,14 +22,19 @@ const PRODUCT_COLUMNS = `
   category:categories (name, slug)
 `;
 
-function normaliseProduct(row: Product): Product {
+export function normaliseProduct(row: Product): Product {
   return {
     ...row,
     tags: row.tags ?? [],
     images: [...(row.images ?? [])].sort((a, b) => a.sort_order - b.sort_order),
-    variants: row.variants ?? [],
+    variants: [...(row.variants ?? [])].sort(
+      (a, b) => a.price_delta - b.price_delta || a.name.localeCompare(b.name),
+    ),
   };
 }
+
+const SLUG_PATTERN = /^[a-z0-9-]{1,120}$/;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function fail(what: string, error: { message: string }): never {
   throw new Error(`Could not load ${what} from Supabase: ${error.message}`);
@@ -122,6 +128,104 @@ export async function getHomeProducts(list: HomeList, limit = 8): Promise<Produc
 
   const { data, error } = await query.limit(limit);
   if (error) fail(`${list} products`, error);
+  return ((data ?? []) as unknown as Product[]).map(normaliseProduct);
+}
+
+/** One active product by its URL slug, or null if it doesn't exist / is archived. */
+export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
+  if (!SLUG_PATTERN.test(slug)) return null;
+  if (isDemoMode()) return buildDemoProducts().find((p) => p.slug === slug) ?? null;
+
+  const { data, error } = await createPublicClient()
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) fail("product", error);
+  return data ? normaliseProduct(data as unknown as Product) : null;
+});
+
+/** Products for the cart: active ones only, in any order. */
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  const valid = [...new Set(ids)].filter((id) => UUID_PATTERN.test(id)).slice(0, 50);
+  if (valid.length === 0) return [];
+  if (isDemoMode()) return buildDemoProducts().filter((p) => valid.includes(p.id));
+
+  const { data, error } = await createPublicClient()
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .in("id", valid);
+  if (error) fail("cart products", error);
+  return ((data ?? []) as unknown as Product[]).map(normaliseProduct);
+}
+
+/** "You may also like": same category first, topped up with other bestsellers. */
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  if (isDemoMode()) {
+    const others = buildDemoProducts().filter((p) => p.id !== product.id);
+    const same = others.filter((p) => p.category_id === product.category_id);
+    const rest = others.filter((p) => p.category_id !== product.category_id && p.type === product.type);
+    const byPopularity = (a: Product, b: Product) => b.sales_count - a.sales_count;
+    return [...same.sort(byPopularity), ...rest.sort(byPopularity)].slice(0, limit);
+  }
+
+  const client = createPublicClient();
+  const same = product.category_id
+    ? await client
+        .from("products")
+        .select(PRODUCT_COLUMNS)
+        .eq("category_id", product.category_id)
+        .neq("id", product.id)
+        .order("sales_count", { ascending: false })
+        .limit(limit)
+    : { data: [], error: null };
+  if (same.error) fail("related products", same.error);
+  const items = ((same.data ?? []) as unknown as Product[]).map(normaliseProduct);
+  if (items.length >= limit) return items;
+
+  const exclude = [product.id, ...items.map((p) => p.id)];
+  const { data, error } = await client
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .eq("type", product.type)
+    .not("id", "in", `(${exclude.join(",")})`)
+    .order("sales_count", { ascending: false })
+    .limit(limit - items.length);
+  if (error) fail("related products", error);
+  return [...items, ...((data ?? []) as unknown as Product[]).map(normaliseProduct)];
+}
+
+/** Full-text search on name, description, tags (and category), best match first. */
+export async function searchProducts(query: string, limit = 24): Promise<Product[]> {
+  const q = query.trim().slice(0, 100);
+  if (!q) return [];
+  if (isDemoMode()) return searchInMemory(buildDemoProducts(), q, limit);
+
+  const { data, error } = await createPublicClient().rpc("search_products", {
+    search_query: q,
+    max_results: limit,
+  });
+  if (error) fail("search results", error);
+  return ((data ?? []) as Product[]).map(normaliseProduct);
+}
+
+/** Every artwork (originals first, then prints), for the artist page. */
+export async function getArtworks(): Promise<Product[]> {
+  if (isDemoMode()) {
+    const art = buildDemoProducts().filter((p) => p.type !== "product");
+    return [
+      ...art.filter((p) => p.type === "original_art"),
+      ...art.filter((p) => p.type === "print"),
+    ];
+  }
+
+  const { data, error } = await createPublicClient()
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .in("type", ["original_art", "print"])
+    .order("type") // enum order: original_art before print
+    .order("created_at", { ascending: false });
+  if (error) fail("artworks", error);
   return ((data ?? []) as unknown as Product[]).map(normaliseProduct);
 }
 

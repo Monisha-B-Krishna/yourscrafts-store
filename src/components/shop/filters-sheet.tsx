@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 /** Mobile/tablet wrapper that shows the filter form in a slide-in panel. */
 export function FiltersSheet({ activeCount, children }: { activeCount: number; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
           <Button variant="outline" className="h-11 rounded-full border-input bg-white px-4 text-sm lg:hidden" />
@@ -18,7 +20,15 @@ export function FiltersSheet({ activeCount, children }: { activeCount: number; c
       </SheetTrigger>
       <SheetContent side="left" className="w-[88vw] max-w-sm overflow-y-auto bg-cream p-6">
         <SheetTitle className="mb-2 font-serif text-2xl">Filters</SheetTitle>
-        {children}
+        {/* Close the panel once filters are applied or a quick link is chosen. */}
+        <div
+          onSubmitCapture={() => setOpen(false)}
+          onClickCapture={(e) => {
+            if ((e.target as HTMLElement).closest("a")) setOpen(false);
+          }}
+        >
+          {children}
+        </div>
       </SheetContent>
     </Sheet>
   );

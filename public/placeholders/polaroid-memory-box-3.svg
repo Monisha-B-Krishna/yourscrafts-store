@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Polaroid Memory Box, styled as a gift">
+  <rect width="600" height="600" fill="#F9DCCB"/>
+  
+  <rect x="90" y="120" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(0 90 120)" opacity=".7"/><rect x="170" y="70" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(30 170 70)" opacity=".7"/><rect x="470" y="110" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(60 470 110)" opacity=".7"/><rect x="520" y="200" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(15 520 200)" opacity=".7"/><rect x="70" y="260" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(45 70 260)" opacity=".7"/><rect x="540" y="330" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(75 540 330)" opacity=".7"/>
+    <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".7"/>
+    <ellipse cx="300" cy="478" rx="190" ry="16" fill="#111" opacity=".08"/>
+    <g transform="translate(300 330) scale(0.8) translate(-300 -330)">
+    <path d="M190 220 h170 l70 80 l-70 80 h-170 z" fill="#F4A27A" transform="rotate(-8 300 300)"/>
+    <circle cx="380" cy="290" r="12" fill="#fff"/>
+    <path d="M270 300 c-30 -40 -80 0 0 60 c80 -60 30 -100 0 -60z" fill="#fff" opacity=".9"/>
+    <path d="M392 290 q60 -80 100 -20" stroke="#D9776B" stroke-width="5" fill="none"/></g>
+</svg>

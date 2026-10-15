@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Illustrated placeholder portrait of the artist">
+  <rect width="600" height="600" fill="#FCE6D9"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <circle cx="300" cy="215" r="78" fill="#5A3A2E"/>
+    <circle cx="300" cy="232" r="62" fill="#E8B796"/>
+    <path d="M238 210 q62 -70 124 0 q-10 -60 -62 -66 q-52 6 -62 66z" fill="#3B2A22"/>
+    <circle cx="372" cy="196" r="12" fill="#F4A27A"/>
+    <path d="M150 600 q0 -230 150 -240 q150 10 150 240z" fill="#F4A27A"/>
+    <path d="M250 372 q50 40 100 0" stroke="#FCE6D9" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M180 470 q-30 -70 50 -80 q90 -6 80 60 q-6 40 -50 30 q-30 -6 -40 20 q-14 30 -40 -30z" fill="#FFF9F4"/>
+    <circle cx="230" cy="420" r="10" fill="#D9776B"/><circle cx="262" cy="410" r="10" fill="#8FA98B"/>
+    <circle cx="290" cy="428" r="10" fill="#F7C35F"/><circle cx="248" cy="446" r="9" fill="#B98AA6"/>
+</svg>

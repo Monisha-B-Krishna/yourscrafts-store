@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { MenuIcon } from "lucide-react";
+import { HeartIcon, MenuIcon, ShoppingBagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { InstagramIcon, WhatsAppIcon } from "./icons";
@@ -21,12 +21,12 @@ export function MobileMenu({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        render={<Button variant="ghost" size="icon-lg" className="size-11 lg:hidden" />}
+        render={<Button variant="ghost" size="icon-lg" className="size-10 rounded-full sm:size-11 lg:hidden" />}
         aria-label="Open menu"
       >
         <MenuIcon className="size-6" />
       </SheetTrigger>
-      <SheetContent side="left" className="w-[85vw] max-w-sm bg-cream p-6">
+      <SheetContent side="left" className="w-[85vw] max-w-sm overflow-y-auto bg-cream p-6">
         <SheetTitle className="font-serif text-2xl">Menu</SheetTitle>
         <nav aria-label="Mobile" className="mt-2">
           <ul className="flex flex-col">
@@ -41,6 +41,28 @@ export function MobileMenu({
                 </Link>
               </li>
             ))}
+          </ul>
+          <ul className="mt-3 flex flex-col border-t pt-3">
+            <li>
+              <Link
+                href="/saved"
+                onClick={close}
+                className="flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-peach-soft"
+              >
+                <HeartIcon className="size-5" aria-hidden="true" />
+                Saved for later
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/cart"
+                onClick={close}
+                className="flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-peach-soft"
+              >
+                <ShoppingBagIcon className="size-5" aria-hidden="true" />
+                Your cart
+              </Link>
+            </li>
           </ul>
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t pt-6">

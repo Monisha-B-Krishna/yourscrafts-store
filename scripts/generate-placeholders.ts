@@ -1,7 +1,8 @@
 /**
- * Draws soft, on-brand placeholder illustrations (SVG) for every example
- * product and the Instagram strip, into public/placeholders/.
- * These are stand-ins until the owner uploads real photos.
+ * Draws soft, on-brand placeholder illustrations (SVG) into public/placeholders/:
+ * three shots per example product (main, close-up, styled), the Instagram strip,
+ * and the artist portrait/studio. These are stand-ins until the owner uploads
+ * real photos.
  * Run: npm run placeholders:generate
  */
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -52,25 +53,111 @@ const motifs: Record<number, (a: string, b: string) => string> = {
     <path d="M175 380 q60 -90 125 -20 q60 -60 125 10 v55 h-250 z" fill="${a}" opacity=".8"/>`,
 };
 
-function svg(body: string, bg: string, label: string): string {
+function svg(body: string, bg: string, label: string, extras = ""): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="${label}">
   <rect width="600" height="600" fill="${bg}"/>
-  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
-  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  ${extras.trim()}
   ${body.trim()}
 </svg>
 `;
 }
 
+const softCircles = `
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>`;
+
+/** Close-up: the motif scaled up and cropped, with a dotted paper texture. */
+function closeUp(motif: string): string {
+  const dots = Array.from({ length: 36 }, (_, i) => {
+    const x = 40 + (i % 6) * 104;
+    const y = 40 + Math.floor(i / 6) * 104;
+    return `<circle cx="${x}" cy="${y}" r="3" fill="#fff" opacity=".55"/>`;
+  }).join("");
+  return `${dots}<g transform="translate(300 330) scale(1.75) translate(-300 -300)">${motif}</g>`;
+}
+
+/** Styled gift shot: motif on a table top with confetti. */
+function styledGift(motif: string, accent: string): string {
+  const confetti = [
+    [90, 120, 0], [170, 70, 30], [470, 110, 60], [520, 200, 15], [70, 260, 45], [540, 330, 75],
+  ]
+    .map(([x, y, r]) => `<rect x="${x}" y="${y}" width="16" height="7" rx="3" fill="${accent}" transform="rotate(${r} ${x} ${y})" opacity=".7"/>`)
+    .join("");
+  return `${confetti}
+    <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".7"/>
+    <ellipse cx="300" cy="478" rx="190" ry="16" fill="#111" opacity=".08"/>
+    <g transform="translate(300 330) scale(0.8) translate(-300 -330)">${motif}</g>`;
+}
+
+/** Art on a wall above a console table. */
+function onTheWall(motif: string): string {
+  return `
+    <rect x="0" y="0" width="600" height="600" fill="#F3E7DC"/>
+    <g transform="translate(300 250) scale(0.62) translate(-300 -300)">${motif}</g>
+    <rect x="130" y="470" width="340" height="18" rx="4" fill="#8A6A55"/>
+    <rect x="160" y="488" width="12" height="90" fill="#8A6A55"/><rect x="428" y="488" width="12" height="90" fill="#8A6A55"/>
+    <path d="M200 470 q8 -60 30 -70 q-4 40 6 70 z" fill="#8FA98B"/>
+    <rect x="380" y="430" width="40" height="40" rx="6" fill="#F4A27A"/>`;
+}
+
 for (const p of seedProducts) {
   const bg = pick(backgrounds, p.n);
-  const body = motifs[p.category](pick(accents, p.n), pick(accents, p.n + 2));
-  writeFileSync(resolve(dir, `${p.slug}.svg`), svg(body, bg, p.name.replace(/&/g, "&amp;")));
+  const accent = pick(accents, p.n);
+  const motif = motifs[p.category](accent, pick(accents, p.n + 2));
+  const label = p.name.replace(/&/g, "&amp;");
+
+  writeFileSync(resolve(dir, `${p.slug}.svg`), svg(motif, bg, label, softCircles));
+  writeFileSync(resolve(dir, `${p.slug}-2.svg`), svg(closeUp(motif), pick(backgrounds, p.n + 1), `${label}, close-up`));
+  writeFileSync(
+    resolve(dir, `${p.slug}-3.svg`),
+    p.type === "product"
+      ? svg(styledGift(motif, pick(accents, p.n + 3)), pick(backgrounds, p.n + 2), `${label}, styled as a gift`)
+      : svg(onTheWall(motif), bg, `${label}, framed on a wall`),
+  );
 }
 
 for (let i = 1; i <= 6; i++) {
   const body = motifs[((i - 1) % 5) + 1](pick(accents, i + 1), pick(accents, i + 3));
-  writeFileSync(resolve(dir, `instagram-${i}.svg`), svg(body, pick(backgrounds, i + 2), `Instagram post ${i}`));
+  writeFileSync(resolve(dir, `instagram-${i}.svg`), svg(body, pick(backgrounds, i + 2), `Instagram post ${i}`, softCircles));
 }
 
-console.log(`Wrote ${seedProducts.length + 6} placeholder images to ${dir}`);
+// Artist portrait placeholder: an illustrated figure holding a palette.
+writeFileSync(
+  resolve(dir, "artist-portrait.svg"),
+  svg(
+    `
+    <circle cx="300" cy="215" r="78" fill="#5A3A2E"/>
+    <circle cx="300" cy="232" r="62" fill="#E8B796"/>
+    <path d="M238 210 q62 -70 124 0 q-10 -60 -62 -66 q-52 6 -62 66z" fill="#3B2A22"/>
+    <circle cx="372" cy="196" r="12" fill="#F4A27A"/>
+    <path d="M150 600 q0 -230 150 -240 q150 10 150 240z" fill="#F4A27A"/>
+    <path d="M250 372 q50 40 100 0" stroke="#FCE6D9" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M180 470 q-30 -70 50 -80 q90 -6 80 60 q-6 40 -50 30 q-30 -6 -40 20 q-14 30 -40 -30z" fill="#FFF9F4"/>
+    <circle cx="230" cy="420" r="10" fill="#D9776B"/><circle cx="262" cy="410" r="10" fill="#8FA98B"/>
+    <circle cx="290" cy="428" r="10" fill="#F7C35F"/><circle cx="248" cy="446" r="9" fill="#B98AA6"/>`,
+    "#FCE6D9",
+    "Illustrated placeholder portrait of the artist",
+    softCircles,
+  ),
+);
+
+// Studio placeholder: easel with a canvas and a jar of brushes.
+writeFileSync(
+  resolve(dir, "artist-studio.svg"),
+  svg(
+    `
+    <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".8"/>
+    <path d="M300 120 L210 520 M300 120 L390 520 M300 120 L300 540" stroke="#8A6A55" stroke-width="12" stroke-linecap="round"/>
+    <rect x="190" y="170" width="220" height="200" rx="6" fill="#fff" stroke="#111" stroke-width="6"/>
+    <circle cx="350" cy="225" r="26" fill="#F4A27A"/>
+    <path d="M194 330 q50 -70 104 -16 q50 -50 108 6 v46 h-212z" fill="#8FA98B" opacity=".85"/>
+    <rect x="180" y="380" width="240" height="14" rx="4" fill="#8A6A55"/>
+    <rect x="455" y="400" width="56" height="74" rx="10" fill="#F4A27A"/>
+    <path d="M468 400 l-10 -60 M482 400 l2 -70 M496 400 l14 -58" stroke="#5A3A2E" stroke-width="6" stroke-linecap="round"/>`,
+    "#FFF1E8",
+    "Illustrated placeholder of a painting corner with an easel",
+    softCircles,
+  ),
+);
+
+console.log(`Wrote ${seedProducts.length * 3 + 8} placeholder images to ${dir}`);

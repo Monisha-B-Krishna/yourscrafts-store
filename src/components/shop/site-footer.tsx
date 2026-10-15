@@ -9,7 +9,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="mt-20 border-t bg-peach-soft/60">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div className="space-y-3">
           <Logo />
           <p className="max-w-xs text-sm text-muted-ink">
@@ -26,6 +26,26 @@ export async function SiteFooter() {
               <li key={c.id}>
                 <Link href={`/shop?category=${c.slug}`} className="text-muted-ink hover:text-ink">
                   {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="footer-explore">
+          <h2 id="footer-explore" className="mb-3 font-sans text-sm font-semibold tracking-wide uppercase">
+            Explore
+          </h2>
+          <ul className="space-y-2 text-sm">
+            {[
+              { href: "/artist", label: "About the artist" },
+              { href: "/search", label: "Search" },
+              { href: "/saved", label: "Saved for later" },
+              { href: "/cart", label: "Your cart" },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="text-muted-ink hover:text-ink">
+                  {link.label}
                 </Link>
               </li>
             ))}

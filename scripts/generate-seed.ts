@@ -6,11 +6,11 @@ import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   ID_KIND,
-  productImageUrl,
   seedCategories,
   seedCollections,
   seedCoupon,
   seedId,
+  seedProductImages,
   seedProducts,
 } from "../src/lib/seed/data";
 import { DEFAULT_SETTINGS } from "../src/lib/settings";
@@ -59,9 +59,13 @@ for (const p of seedProducts) {
     `  ${textArray(p.tags)}, ${p.featured ? "true" : "false"}, true, ${p.weightG}, ${q(p.dimensions)}, ${p.salesCount},`,
     `  now() - interval '${p.daysAgo} days'`,
     ") on conflict (id) do nothing;",
-    `insert into public.product_images (id, product_id, url, alt, sort_order) values (${q(seedId(ID_KIND.image, p.n))}, ${q(id)}, ${q(productImageUrl(p.slug))}, ${q(p.name)}, 0)`,
-    "  on conflict (id) do nothing;",
   );
+  for (const img of seedProductImages(p)) {
+    lines.push(
+      `insert into public.product_images (id, product_id, url, alt, sort_order) values (${q(seedId(ID_KIND.image, p.n * 10 + img.sort_order))}, ${q(id)}, ${q(img.url)}, ${q(img.alt)}, ${img.sort_order})`,
+      "  on conflict (id) do nothing;",
+    );
+  }
   for (const [i, v] of (p.variants ?? []).entries()) {
     variantN += 1;
     lines.push(

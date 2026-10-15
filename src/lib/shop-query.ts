@@ -72,6 +72,32 @@ export function parseShopParams(params: RawParams): ProductQuery {
   };
 }
 
+/** Quick price ranges shown in the filters (in rupees). */
+export const PRICE_PRESETS = [
+  { label: "Under ₹500", min: undefined, max: 499 },
+  { label: "₹500 – ₹1,000", min: 500, max: 1000 },
+  { label: "₹1,000 – ₹2,000", min: 1000, max: 2000 },
+  { label: "Over ₹2,000", min: 2000, max: undefined },
+] as const;
+
+type ShopLinkState = Pick<ProductQuery, "category" | "minPrice" | "maxPrice" | "inStock" | "sort"> & { page?: number };
+
+/**
+ * A clean /shop URL for a given filter state, leaving out defaults so links
+ * stay short and shareable. Prices in the state are paise; the URL uses rupees.
+ */
+export function shopHref(state: ShopLinkState): string {
+  const params = new URLSearchParams();
+  if (state.category) params.set("category", state.category);
+  if (state.minPrice !== undefined) params.set("min", String(Math.round(state.minPrice / 100)));
+  if (state.maxPrice !== undefined) params.set("max", String(Math.round(state.maxPrice / 100)));
+  if (state.inStock) params.set("stock", "1");
+  if (state.sort !== "new") params.set("sort", state.sort);
+  if (state.page && state.page > 1) params.set("page", String(state.page));
+  const qs = params.toString();
+  return qs ? `/shop?${qs}` : "/shop";
+}
+
 /** In-memory version of the shop query, used by demo mode (and tests). */
 export function applyProductQuery(
   products: Product[],

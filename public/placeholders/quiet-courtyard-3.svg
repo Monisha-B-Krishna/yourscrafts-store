@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Quiet Courtyard, framed on a wall">
+  <rect width="600" height="600" fill="#FFF4EC"/>
+  
+  <rect x="0" y="0" width="600" height="600" fill="#F3E7DC"/>
+    <g transform="translate(300 250) scale(0.62) translate(-300 -300)">
+    <rect x="150" y="150" width="300" height="300" rx="10" fill="#fff" stroke="#111" stroke-width="10"/>
+    <rect x="175" y="175" width="250" height="250" fill="#E98A5F" opacity=".35"/>
+    <circle cx="360" cy="240" r="34" fill="#B98AA6"/>
+    <path d="M175 380 q60 -90 125 -20 q60 -60 125 10 v55 h-250 z" fill="#B98AA6" opacity=".8"/></g>
+    <rect x="130" y="470" width="340" height="18" rx="4" fill="#8A6A55"/>
+    <rect x="160" y="488" width="12" height="90" fill="#8A6A55"/><rect x="428" y="488" width="12" height="90" fill="#8A6A55"/>
+    <path d="M200 470 q8 -60 30 -70 q-4 40 6 70 z" fill="#8FA98B"/>
+    <rect x="380" y="430" width="40" height="40" rx="6" fill="#F4A27A"/>
+</svg>

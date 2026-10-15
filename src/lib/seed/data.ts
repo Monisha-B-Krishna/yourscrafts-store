@@ -280,3 +280,13 @@ export const instagramImages = [1, 2, 3, 4, 5, 6].map((i) => ({
 export function productImageUrl(slug: string): string {
   return `/placeholders/${slug}.svg`;
 }
+
+/** Three placeholder shots per product: main, close-up and styled (on the wall for art). */
+export function seedProductImages(p: Pick<SeedProduct, "slug" | "name" | "type">) {
+  const styled = p.type === "product" ? "styled as a gift" : "framed on a wall";
+  return [
+    { url: productImageUrl(p.slug), alt: p.name, sort_order: 0 },
+    { url: `/placeholders/${p.slug}-2.svg`, alt: `${p.name}, close-up`, sort_order: 1 },
+    { url: `/placeholders/${p.slug}-3.svg`, alt: `${p.name}, ${styled}`, sort_order: 2 },
+  ];
+}

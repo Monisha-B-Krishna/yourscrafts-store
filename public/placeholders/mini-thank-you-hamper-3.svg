@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Mini Thank-You Hamper, styled as a gift">
+  <rect width="600" height="600" fill="#FFF4EC"/>
+  
+  <rect x="90" y="120" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(0 90 120)" opacity=".7"/><rect x="170" y="70" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(30 170 70)" opacity=".7"/><rect x="470" y="110" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(60 470 110)" opacity=".7"/><rect x="520" y="200" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(15 520 200)" opacity=".7"/><rect x="70" y="260" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(45 70 260)" opacity=".7"/><rect x="540" y="330" width="16" height="7" rx="3" fill="#F4A27A" transform="rotate(75 540 330)" opacity=".7"/>
+    <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".7"/>
+    <ellipse cx="300" cy="478" rx="190" ry="16" fill="#111" opacity=".08"/>
+    <g transform="translate(300 330) scale(0.8) translate(-300 -330)">
+    <path d="M200 300 q100 -150 200 0" stroke="#B98AA6" stroke-width="14" fill="none"/>
+    <rect x="170" y="300" width="260" height="170" rx="26" fill="#C9A27E"/>
+    <path d="M170 350 h260 M170 400 h260" stroke="#fff" stroke-width="6" opacity=".6"/>
+    <circle cx="250" cy="290" r="26" fill="#B98AA6"/><rect x="300" y="255" width="44" height="60" rx="8" fill="#fff" opacity=".8"/></g>
+</svg>

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { discountPercent, effectivePrice, formatINR, isOnSale } from "@/lib/pricing";
+import Link from "next/link";
+import { discountPercent, formatINR, fromPrice, isOnSale } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -19,17 +20,17 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: "peach" | 
 }
 
 /**
- * Product tile for grids. Product pages arrive in Phase 2, at which point the
- * whole card becomes a link to /product/[slug].
+ * Product tile for grids. The product name is the link; it stretches over the
+ * whole card so the image is clickable too, without nesting extra links.
  */
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const image = product.images[0];
   const soldOut = product.stock <= 0;
   const onSale = isOnSale(product);
-  const fromPrice = product.variants.length > 0;
+  const hasVariants = product.variants.length > 0;
 
   return (
-    <article className="group flex flex-col">
+    <article className="group relative flex flex-col rounded-2xl has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-ring">
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-peach-soft">
         {image ? (
           <Image
@@ -57,14 +58,19 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <p className="text-xs tracking-wide text-muted-ink uppercase">{product.category.name}</p>
         )}
         <h3 className="font-sans text-sm leading-snug font-medium text-ink sm:text-base">
-          {product.name}
+          <Link
+            href={`/product/${product.slug}`}
+            className="outline-none after:absolute after:inset-0 after:rounded-2xl hover:underline hover:underline-offset-4"
+          >
+            {product.name}
+          </Link>
         </h3>
         <p className="mt-auto flex flex-wrap items-baseline gap-x-2 pt-1">
           <span className="font-semibold text-ink">
-            {fromPrice && <span className="font-normal text-muted-ink">From </span>}
-            {formatINR(effectivePrice(product))}
+            {hasVariants && <span className="font-normal text-muted-ink">From </span>}
+            {formatINR(fromPrice(product))}
           </span>
-          {onSale && (
+          {onSale && !hasVariants && (
             <span className="text-sm text-muted-ink line-through">
               <span className="sr-only">Was </span>
               {formatINR(product.price)}

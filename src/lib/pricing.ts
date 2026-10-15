@@ -36,6 +36,32 @@ export function discountPercent(p: { price: Paise; sale_price: Paise | null }): 
   return Math.round(((p.price - effectivePrice(p)) / p.price) * 100);
 }
 
+/** Price of one unit of a product, including the chosen variant's price difference. */
+export function unitPrice(
+  p: { price: Paise; sale_price: Paise | null },
+  variant?: { price_delta: Paise } | null,
+): Paise {
+  return Math.max(0, effectivePrice(p) + (variant?.price_delta ?? 0));
+}
+
+/** The pre-sale price to show struck through, or null when not on sale. */
+export function compareAtPrice(
+  p: { price: Paise; sale_price: Paise | null },
+  variant?: { price_delta: Paise } | null,
+): Paise | null {
+  return isOnSale(p) ? p.price + (variant?.price_delta ?? 0) : null;
+}
+
+/** Lowest price across a product's variants, for "From ₹X" labels. */
+export function fromPrice(p: {
+  price: Paise;
+  sale_price: Paise | null;
+  variants: { price_delta: Paise }[];
+}): Paise {
+  if (p.variants.length === 0) return effectivePrice(p);
+  return Math.min(...p.variants.map((v) => unitPrice(p, v)));
+}
+
 /** Flat shipping, free at or above the threshold. Both values come from store settings. */
 export function shippingFee(
   subtotal: Paise,

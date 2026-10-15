@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Resin Floral Coaster Set, styled as a gift">
+  <rect width="600" height="600" fill="#F9DCCB"/>
+  
+  <rect x="90" y="120" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(0 90 120)" opacity=".7"/><rect x="170" y="70" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(30 170 70)" opacity=".7"/><rect x="470" y="110" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(60 470 110)" opacity=".7"/><rect x="520" y="200" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(15 520 200)" opacity=".7"/><rect x="70" y="260" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(45 70 260)" opacity=".7"/><rect x="540" y="330" width="16" height="7" rx="3" fill="#C9A27E" transform="rotate(75 540 330)" opacity=".7"/>
+    <rect x="0" y="470" width="600" height="130" fill="#EBC9B2" opacity=".7"/>
+    <ellipse cx="300" cy="478" rx="190" ry="16" fill="#111" opacity=".08"/>
+    <g transform="translate(300 330) scale(0.8) translate(-300 -330)">
+    <path d="M180 360 q120 120 240 0 z" fill="#F4A27A"/>
+    <path d="M180 360 h240" stroke="#D9776B" stroke-width="10" stroke-linecap="round"/>
+    <path d="M300 340 q-28 -50 0 -110 q28 60 0 110 z" fill="#F7C35F"/>
+    <circle cx="240" cy="395" r="8" fill="#fff"/><circle cx="300" cy="405" r="8" fill="#fff"/><circle cx="360" cy="395" r="8" fill="#fff"/></g>
+</svg>

@@ -19,9 +19,19 @@ The source of truth is `supabase/migrations/`.
 | `categories` | A shop category | `name`, `slug`, `parent_id` (for sub-categories), `sort_order` |
 | `products` | Anything for sale: gifts, original paintings and prints | `type` (`product` / `original_art` / `print`), `price`, `sale_price` (null = not on sale), `stock`, `sku`, `tags[]`, `is_featured`, `is_active` (false = archived), `weight_g`, `dimensions`, `sales_count` |
 | | | `effective_price`: generated, `coalesce(sale_price, price)` |
-| | | `search_vector`: generated full-text index over name (weight A), tags (B) and description (C) |
+| | | `search_vector`: generated full-text index (english, stemmed) over name (weight A), tags (B) and description (C) |
+| | | `search_vector_simple`: the same fields unstemmed, for "as you type" prefix matching |
 | `product_images` | One image of a product | `product_id`, `url`, `alt`, `sort_order` (0 = main image) |
 | `product_variants` | A size/colour option | `product_id`, `name`, `price_delta` (added to the product price), `stock`, `sku` |
+
+**Stock for products with variants:** each variant's `stock` is the source of truth, and a
+trigger keeps `products.stock` equal to the variants' total. Unit price of a variant =
+`effective_price + price_delta`.
+
+**Search:** `search_products(search_query, max_results)` returns the best matches as JSON
+(same shape as the storefront uses). Every word must match name, tags, description or category
+name (prefixes count, so "choc" finds chocolate); if nothing matches all words, products matching
+any word are returned.
 | `collections` | A named edition, e.g. "Diwali Edition 2026" | `starts_at`, `ends_at`, `is_active`, `banner_image` |
 | `collection_products` | Membership of a product in a collection | `collection_id`, `product_id` |
 | `deals` | A time-boxed discount on one product or one category | `type` (`percentage` / `flat`), `value` (percent points, or paise when flat), `product_id` **or** `category_id`, `starts_at`, `ends_at` |
@@ -57,28 +67,38 @@ Line revenue = `price_snapshot * qty`. For revenue reports, filter `payment_stat
 
 ## Analytics: `events`
 
-One row per tracked action. Visitors can write events but nobody can read them except the admin.
+One row per tracked action. Only the admin can read events.
+
+**How events get in:** the browser sends each event to `/api/events`; the server checks it
+against a fixed schema (unknown event names or keys are rejected or dropped), masks anything
+that looks like an email or phone number, and writes it with the service role. Nobody can write
+to the table directly with the public key. Payment events are written by the server only.
 
 | Column | Meaning |
 |---|---|
-| `session_id` | Random ID for one browser session (8–64 chars); groups a visit's events |
-| `user_id` | Set only when the visitor is signed in |
+| `session_id` | Random ID for one browsing session (stored in the browser; a new one starts after 30 minutes of inactivity). Groups a visit's events. |
+| `user_id` | Set only when the visitor is signed in (from their login, never from the browser) |
 | `event_name` | One of the events below (enforced by the database) |
-| `product_id` | The product involved, when there is one |
+| `product_id` | The product involved (required for product, cart and save events) |
 | `metadata` | Extra JSON details. **Never contains personal data** (no names, emails, phones or addresses). |
+| `created_at` | When it happened (UTC) |
 
-| `event_name` | Fired when | `metadata` |
+| `event_name` | Fired when | `metadata` keys |
 |---|---|---|
-| `page_view` | Any page loads | `{ "path": "/shop", "referrer_host": "instagram.com" }` |
-| `product_view` | A product page loads | `{}` |
-| `search` | A search is submitted | `{ "query": "diwali", "results": 3 }` |
-| `add_to_cart` / `remove_from_cart` | Cart changes | `{ "qty": 1, "variant_id": "…" }` |
-| `save_for_later` | Item saved | `{}` |
-| `begin_checkout` | Checkout page opened | `{ "items": 3, "subtotal": 249700 }` |
-| `payment_success` / `payment_failed` | Razorpay result | `{ "order_number": "YCW-2026-00001", "total": 249700 }` / `{ "reason": "…" }` |
+| `page_view` | Any shop page is shown (including in-app navigation) | `path` (e.g. `/shop`, no query string); `referrer_host` on the first page of a visit when the visitor came from another site (e.g. `instagram.com`) |
+| `product_view` | A product page is shown | none |
+| `search` | Search results page shown, or a suggestion picked from the search box | `query` (lower-cased, emails/phone numbers masked as `[email]`/`[number]`), `results` (count), `source` (`results_page` / `suggestion`) |
+| `add_to_cart` | Added from a product page, quantity raised in the cart, or moved from saved items | `qty` (units added), `variant_id` (or null), `source` (`product_page` / `cart` / `saved`), `unit_price` (paise, looked up by the server at that moment) |
+| `remove_from_cart` | Removed, or quantity lowered, in the cart | `qty` (units removed), `variant_id` (or null), `source` (`cart`) |
+| `save_for_later` | Saved by a signed-in customer | `source` (`product_page` / `cart`) |
+| `begin_checkout` | Checkout opened (Phase 4) | `items`, `subtotal` (paise) |
+| `payment_success` / `payment_failed` | Razorpay result (Phase 4, server-side) | to be confirmed in Phase 4 |
 
-Event logging is wired up in Phases 2 and 4. The exact metadata keys above will be confirmed
-as each event goes live.
+Notes for analysis:
+- Quantities in `add_to_cart` / `remove_from_cart` are **changes**, not totals, so net cart
+  units per session = sum(add qty) − sum(remove qty).
+- Removing an item that was already sold out or no longer available is not logged as
+  `remove_from_cart` (it wasn't a choice).
 
 ### Example queries
 
@@ -93,4 +113,13 @@ select p.name,
        count(*) filter (where e.event_name = 'add_to_cart')  as adds
 from events e join products p on p.id = e.product_id
 group by p.name order by views desc;
+
+-- Searches that found nothing (ideas for new products)
+select metadata->>'query' as query, count(*) as times
+from events
+where event_name = 'search' and (metadata->>'results')::int = 0
+group by 1 order by 2 desc;
 ```
+
+In Python: `pd.read_sql("select * from events", conn)` and expand the JSON with
+`pd.json_normalize(df["metadata"])`.

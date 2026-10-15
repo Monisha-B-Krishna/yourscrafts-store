@@ -1,10 +1,10 @@
 import type { Category, Collection, Product } from "@/lib/types";
 import {
   ID_KIND,
-  productImageUrl,
   seedCategories,
   seedCollections,
   seedId,
+  seedProductImages,
   seedProducts,
 } from "./data";
 
@@ -41,7 +41,7 @@ export function buildDemoProducts(now = Date.now()): Product[] {
       sales_count: p.salesCount,
       dimensions: p.dimensions ?? null,
       created_at: new Date(now - p.daysAgo * DAY_MS).toISOString(),
-      images: [{ url: productImageUrl(p.slug), alt: p.name, sort_order: 0 }],
+      images: seedProductImages(p),
       variants: (p.variants ?? []).map((v) => ({
         id: seedId(ID_KIND.variant, ++variantCounter),
         name: v.name,

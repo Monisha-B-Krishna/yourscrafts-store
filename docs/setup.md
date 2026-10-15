@@ -53,7 +53,7 @@ You'll need this before the site goes live on Vercel.
 | `npm run dev` | Start the site at http://localhost:3000 |
 | `npm run build` | Production build (what Vercel runs) |
 | `npm run lint` | Check code style |
-| `npm test` | Run the automated tests |
+| `npm test` | Run the automated tests (the database tests run only while the local database is up) |
 | `npm run seed:generate` | Rebuild `supabase/seed.sql` from `src/lib/seed/data.ts` |
 | `npm run placeholders:generate` | Redraw the placeholder product images |
 | `npm run db:start` / `db:reset` | Start, or wipe and reseed, the local database |
