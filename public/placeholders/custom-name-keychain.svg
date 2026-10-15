@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Custom Name Keychain">
+  <rect width="600" height="600" fill="#F6E3D6"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <path d="M190 220 h170 l70 80 l-70 80 h-170 z" fill="#8FA98B" transform="rotate(-8 300 300)"/>
+    <circle cx="380" cy="290" r="12" fill="#fff"/>
+    <path d="M270 300 c-30 -40 -80 0 0 60 c80 -60 30 -100 0 -60z" fill="#fff" opacity=".9"/>
+    <path d="M392 290 q60 -80 100 -20" stroke="#F4A27A" stroke-width="5" fill="none"/>
+</svg>

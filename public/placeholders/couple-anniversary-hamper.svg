@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Couple Anniversary Hamper">
+  <rect width="600" height="600" fill="#F6E3D6"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <path d="M200 300 q100 -150 200 0" stroke="#F4A27A" stroke-width="14" fill="none"/>
+    <rect x="170" y="300" width="260" height="170" rx="26" fill="#8FA98B"/>
+    <path d="M170 350 h260 M170 400 h260" stroke="#fff" stroke-width="6" opacity=".6"/>
+    <circle cx="250" cy="290" r="26" fill="#F4A27A"/><rect x="300" y="255" width="44" height="60" rx="8" fill="#fff" opacity=".8"/>
+</svg>

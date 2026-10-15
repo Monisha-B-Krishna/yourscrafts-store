@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Instagram post 3">
+  <rect width="600" height="600" fill="#FFF4EC"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <path d="M180 360 q120 120 240 0 z" fill="#8FA98B"/>
+    <path d="M180 360 h240" stroke="#F4A27A" stroke-width="10" stroke-linecap="round"/>
+    <path d="M300 340 q-28 -50 0 -110 q28 60 0 110 z" fill="#F7C35F"/>
+    <circle cx="240" cy="395" r="8" fill="#fff"/><circle cx="300" cy="405" r="8" fill="#fff"/><circle cx="360" cy="395" r="8" fill="#fff"/>
+</svg>

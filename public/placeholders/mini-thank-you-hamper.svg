@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Mini Thank-You Hamper">
+  <rect width="600" height="600" fill="#FDEBDF"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <path d="M200 300 q100 -150 200 0" stroke="#B98AA6" stroke-width="14" fill="none"/>
+    <rect x="170" y="300" width="260" height="170" rx="26" fill="#C9A27E"/>
+    <path d="M170 350 h260 M170 400 h260" stroke="#fff" stroke-width="6" opacity=".6"/>
+    <circle cx="250" cy="290" r="26" fill="#B98AA6"/><rect x="300" y="255" width="44" height="60" rx="8" fill="#fff" opacity=".8"/>
+</svg>

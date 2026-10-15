@@ -1,26 +1,100 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/*
+ * Brand palette (CLAUDE.md §2). Tailwind v4 keeps its theme config in CSS,
+ * so these variables ARE the Tailwind config: use classes like
+ * bg-cream, text-ink, bg-peach, bg-peach-soft, text-muted-ink.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #111111;
+  --peach: #f4a27a;
+  --peach-soft: #fce6d9;
+  --cream: #fff9f4;
+  --muted: #6b6b6b;
+  --peach-deep: #9a4a22; /* darker peach for small text: passes 4.5:1 on cream */
+
+  /* shadcn/ui tokens mapped onto the brand palette */
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: var(--cream);
+  --popover-foreground: var(--ink);
+  /* Ink text on peach passes 4.5:1; white on peach does not. */
+  --primary: var(--peach);
+  --primary-foreground: var(--ink);
+  --secondary: var(--peach-soft);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent: var(--peach-soft);
+  --accent-foreground: var(--ink);
+  --destructive: #b42318;
+  --border: #eedccf;
+  --input: #e3cbbb;
+  --ring: #c4683d;
+  --radius: 0.875rem;
 }
 
 @theme inline {
+  --color-ink: var(--ink);
+  --color-peach: var(--peach);
+  --color-peach-soft: var(--peach-soft);
+  --color-cream: var(--cream);
+  --color-muted-ink: var(--muted);
+  --color-peach-deep: var(--peach-deep);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--peach-soft);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  --font-heading: var(--font-playfair);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif tracking-tight;
+  }
+  /* Visible keyboard focus everywhere (accessibility, §2). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }

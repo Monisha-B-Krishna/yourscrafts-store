@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Lotus Pond (Art Print)">
+  <rect width="600" height="600" fill="#F9DCCB"/>
+  <circle cx="90" cy="520" r="120" fill="#fff" opacity=".35"/>
+  <circle cx="530" cy="80" r="90" fill="#fff" opacity=".35"/>
+  <rect x="150" y="150" width="300" height="300" rx="10" fill="#fff" stroke="#111" stroke-width="10"/>
+    <rect x="175" y="175" width="250" height="250" fill="#8FA98B" opacity=".35"/>
+    <circle cx="360" cy="240" r="34" fill="#D9776B"/>
+    <path d="M175 380 q60 -90 125 -20 q60 -60 125 10 v55 h-250 z" fill="#D9776B" opacity=".8"/>
+</svg>
