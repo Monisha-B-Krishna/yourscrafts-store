@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { HeartIcon, MenuIcon, ShoppingBagIcon } from "lucide-react";
+import { HeartIcon, MenuIcon, ShoppingBagIcon, UserRoundIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { InstagramIcon, WhatsAppIcon } from "./icons";
@@ -43,6 +43,16 @@ export function MobileMenu({
             ))}
           </ul>
           <ul className="mt-3 flex flex-col border-t pt-3">
+            <li>
+              <Link
+                href="/account"
+                onClick={close}
+                className="flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-peach-soft"
+              >
+                <UserRoundIcon className="size-5" aria-hidden="true" />
+                My account
+              </Link>
+            </li>
             <li>
               <Link
                 href="/saved"

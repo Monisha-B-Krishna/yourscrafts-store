@@ -6,12 +6,17 @@ import { HeartIcon } from "lucide-react";
 import { toast } from "sonner";
 import { saveForLaterAction } from "@/app/(shop)/saved/actions";
 import { track } from "@/lib/analytics/client";
+import { loginHref } from "@/lib/auth/redirect";
 import { cn } from "@/lib/utils";
 
-/** Shown when a guest tries to save. Phase 3 adds a "Sign in" button here. */
+/** Shown when a guest tries to save, with a button that brings them back here after signing in. */
 export function toastSignInToSave() {
   toast("Please sign in to save items for later", {
     description: "Saved items live in your account, so you can find them on any device.",
+    action: {
+      label: "Sign in",
+      onClick: () => window.location.assign(loginHref(window.location.pathname + window.location.search)),
+    },
   });
 }
 

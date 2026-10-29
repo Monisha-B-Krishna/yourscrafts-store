@@ -41,9 +41,9 @@ any word are returned.
 
 | Table | What one row is | Key columns |
 |---|---|---|
-| `profiles` | One per signed-up user (created automatically on sign-up) | `user_id` → `auth.users`, `full_name`, `phone`, `role` (`customer` / `admin`) |
-| `addresses` | A saved shipping address | `user_id`, `pincode` (6 digits), `state`, `is_default` |
-| `carts` / `cart_items` | A signed-in user's cart (guest carts live in the browser) | `cart_items.product_id`, `variant_id`, `qty` |
+| `profiles` | One per signed-up user (created automatically on sign-up) | `user_id` → `auth.users`, `full_name` (≤ 100 chars), `phone` (10-digit Indian mobile, no +91, e.g. `9876543210`), `role` (`customer` / `admin`) |
+| `addresses` | A saved shipping address (up to 20 per customer) | `user_id`, `phone` (10 digits), `city`, `state` (one of the 36 states/UTs), `pincode` (6 digits), `is_default` (exactly one per customer) |
+| `carts` / `cart_items` | A signed-in user's cart (guest carts live in the browser and are merged in at login) | `cart_items.product_id`, `variant_id`, `qty` (1–99), `created_at` (order the items were added) |
 | `saved_items` | "Save for later" | `user_id`, `product_id` |
 
 ## Orders

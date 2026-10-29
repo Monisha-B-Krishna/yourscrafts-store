@@ -118,15 +118,15 @@ describe.skipIf(!reachable)("local Supabase", () => {
         { user_id: alice.userId, product_id: DIYAS_ID },
       ]);
       expect(error).toBeNull();
-      const saved = await listSavedProducts(alice.client);
+      const saved = await listSavedProducts(alice.client, alice.userId);
       expect(saved.map((p) => p.id).sort()).toEqual([BOUQUET_ID, DIYAS_ID].sort());
       expect(saved[0].images.length).toBeGreaterThan(0);
     });
 
     it("hides one customer's saved items from another", async () => {
-      expect(await listSavedProducts(bob.client)).toEqual([]);
+      expect(await listSavedProducts(bob.client, bob.userId)).toEqual([]);
       await bob.client.from("saved_items").delete().eq("user_id", alice.userId);
-      expect(await listSavedProducts(alice.client)).toHaveLength(2);
+      expect(await listSavedProducts(alice.client, alice.userId)).toHaveLength(2);
     });
 
     it("stops a customer saving items into someone else's account", async () => {

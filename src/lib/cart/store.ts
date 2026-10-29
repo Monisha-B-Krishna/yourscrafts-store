@@ -5,7 +5,9 @@ import { MAX_QTY_PER_LINE } from "./quote";
 /**
  * The guest cart, kept in the browser's localStorage (CLAUDE.md §5). It stores
  * only ids and quantities — prices are always worked out on the server.
- * Phase 3 merges this into the database cart when the customer logs in.
+ * For signed-in customers it is also a copy of their database cart: CartSync
+ * (components/shop/cart-sync.tsx) merges a guest cart in at login and keeps
+ * the database in step after every change.
  */
 
 export interface CartLine {
@@ -141,6 +143,12 @@ export const cartStore = {
   },
   clear() {
     write([]);
+  },
+  /** Replaces the whole cart (used when the saved cart arrives from the database). */
+  replaceAll(lines: CartLine[]) {
+    let next: CartLine[] = [];
+    for (const line of lines) next = addLine(next, line);
+    write(next);
   },
 };
 

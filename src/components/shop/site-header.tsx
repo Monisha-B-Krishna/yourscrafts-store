@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeartIcon } from "lucide-react";
+import { HeartIcon, UserRoundIcon } from "lucide-react";
 import { getSettings, isDemoMode } from "@/lib/catalog";
 import { CUSTOM_ORDER_MESSAGE, whatsappLink } from "@/lib/whatsapp";
 import { CartButton } from "./cart-button";
@@ -52,6 +52,13 @@ export async function SiteHeader() {
               className="hidden size-11 items-center justify-center rounded-full text-ink hover:bg-peach-soft lg:inline-flex"
             >
               <HeartIcon className="size-[22px]" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/account"
+              aria-label="My account"
+              className="hidden size-11 items-center justify-center rounded-full text-ink hover:bg-peach-soft sm:inline-flex"
+            >
+              <UserRoundIcon className="size-[22px]" aria-hidden="true" />
             </Link>
             <a
               href={customOrderHref}

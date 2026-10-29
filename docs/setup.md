@@ -46,6 +46,34 @@ You'll need this before the site goes live on Vercel.
 4. Load the example products: open **SQL Editor** in the Supabase dashboard, paste the
    contents of `supabase/seed.sql` and click **Run**.
 
+## 4. Switch on customer accounts (Phase 3)
+
+Sign-up, login and "My account" use Supabase Auth, which is free. Do these once in the hosted
+project (the local database already has them set in `supabase/config.toml`).
+
+1. **Make yourself the owner.** In `.env.local` (and later in Vercel's environment variables), set
+   `ADMIN_EMAIL` to the email you'll sign in with. Then sign up on the site with that email and
+   tap the confirmation link. Your account becomes the admin, and **My account** shows a link to
+   the admin panel. Do this before you share the site, so nobody else can register your email first.
+2. **Keep email confirmation on.** Go to **Authentication → Sign In / Providers → Email** and make sure
+   **Confirm email** is switched on (it is by default). The admin role is only given to a confirmed
+   email, so this is what stops someone pretending to be you.
+3. **Tell Supabase your site's address.** Go to **Authentication → URL Configuration**:
+   - *Site URL*: your Vercel address, e.g. `https://yourscrafts-store.vercel.app`
+   - *Redirect URLs*: add `https://yourscrafts-store.vercel.app/**` and `http://localhost:3000/**`
+4. **Use the branded emails.** Go to **Authentication → Emails → Templates**. For each of
+   *Confirm signup*, *Magic link*, *Reset password* and *Change email address*, set the subject and
+   paste in the matching file from `supabase/templates/`:
+   `confirmation.html`, `magic_link.html`, `recovery.html`, `email_change.html`.
+   These links open `/auth/confirm` on your site, so they work even when a customer opens the email
+   on a different phone or laptop.
+5. **Optional, before launch:** Supabase's built-in email sender only sends a few emails an hour.
+   When real customers start signing up, connect a free SMTP sender (Resend's free tier works) under
+   **Authentication → Emails → SMTP Settings**.
+
+To test emails on your laptop, open **http://127.0.0.1:54324** while the local database is running.
+Every email the site sends shows up there instead of going out.
+
 ## Useful commands
 
 | Command | What it does |

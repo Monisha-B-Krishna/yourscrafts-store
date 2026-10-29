@@ -19,7 +19,7 @@ export async function createClient() {
           );
         } catch {
           // Called from a Server Component, where cookies are read-only.
-          // Session refresh will be handled by middleware (Phase 3).
+          // Middleware (src/middleware.ts) refreshes the session instead.
         }
       },
     },

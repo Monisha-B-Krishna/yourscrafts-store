@@ -8,10 +8,12 @@ import type { Product } from "@/lib/types";
  * as the signed-in customer, so Row Level Security limits it to their own rows.
  */
 
-export async function listSavedProducts(client: SupabaseClient): Promise<Product[]> {
+export async function listSavedProducts(client: SupabaseClient, userId: string): Promise<Product[]> {
+  // Filter on the customer explicitly: the owner (admin) can read everyone's rows.
   const { data, error } = await client
     .from("saved_items")
     .select(`created_at, product:products (${PRODUCT_COLUMNS})`)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`Could not load saved items: ${error.message}`);
   // Archived products come back as null (hidden by RLS) and are skipped.
