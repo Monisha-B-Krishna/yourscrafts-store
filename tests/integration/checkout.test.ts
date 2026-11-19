@@ -246,3 +246,52 @@ describe.skipIf(!reachable)("local Supabase: checkout & payments", () => {
     });
   });
 });
+
+describe.skipIf(!reachable)("local Supabase: order emails & tracking", () => {
+  const admin = createClient(url, serviceKey, options);
+
+  async function paidOrder() {
+    const { data: id } = await admin.rpc("create_pending_order", {
+      order_row: {
+        user_id: "",
+        email: "track@example.test",
+        phone: "9876543210",
+        shipping_address: { name: "A", phone: "9876543210", line1: "x", line2: null, city: "y", state: "Goa", pincode: "403001" },
+        subtotal: 10000,
+        discount: 0,
+        shipping_fee: 8000,
+        total: 18000,
+        coupon_code: "",
+        checkout_session_id: "",
+      },
+      items: [{ product_id: "20000000-0000-4000-8000-000000000011", variant_id: "", name: "Diyas", price: 10000, qty: 1 }],
+    });
+    const rzp = `order_${randomUUID().replace(/-/g, "").slice(0, 14)}`;
+    await admin.from("orders").update({ razorpay_order_id: rzp }).eq("id", id);
+    return { id: id as string, rzp };
+  }
+
+  it("lets exactly one caller claim the receipt email, and only once paid", async () => {
+    const { id, rzp } = await paidOrder();
+    expect((await admin.rpc("claim_confirmation_email", { p_order_id: id })).data).toBe(false); // not paid yet
+    await admin.rpc("mark_order_paid", { p_razorpay_order_id: rzp, p_razorpay_payment_id: "pay_claimtest1" });
+    const claims = await Promise.all([1, 2, 3].map(() => admin.rpc("claim_confirmation_email", { p_order_id: id })));
+    expect(claims.map((c) => c.data).filter(Boolean)).toHaveLength(1);
+    await admin.rpc("release_confirmation_email", { p_order_id: id });
+    expect((await admin.rpc("claim_confirmation_email", { p_order_id: id })).data).toBe(true);
+  });
+
+  it("keeps email claiming server-only", async () => {
+    const guest = createClient(url, anonKey, options);
+    const { id } = await paidOrder();
+    expect((await guest.rpc("claim_confirmation_email", { p_order_id: id })).error).not.toBeNull();
+    expect((await guest.rpc("release_confirmation_email", { p_order_id: id })).error).not.toBeNull();
+  });
+
+  it("never shows order details to a guest reading the table directly", async () => {
+    const guest = createClient(url, anonKey, options);
+    const { data } = await guest.from("orders").select("id").limit(5);
+    expect(data ?? []).toEqual([]);
+    expect(((await guest.from("order_status_history").select("id").limit(5)).data ?? [])).toEqual([]);
+  });
+});

@@ -1,3 +1,5 @@
+import { after } from "next/server";
+import { sendOrderConfirmation } from "@/lib/email/order-emails";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -40,17 +42,21 @@ export async function POST(request: Request) {
 
   if (event.event === "payment.captured" || event.event === "order.paid") {
     if (payment.currency && payment.currency !== "INR") return new Response("wrong currency", { status: 400 });
-    const { error } = await admin.rpc("mark_order_paid", {
-      p_razorpay_order_id: payment.order_id,
-      p_razorpay_payment_id: payment.id,
-      p_amount: typeof payment.amount === "number" ? payment.amount : null,
-    });
+    const { data, error } = await admin
+      .rpc("mark_order_paid", {
+        p_razorpay_order_id: payment.order_id,
+        p_razorpay_payment_id: payment.id,
+        p_amount: typeof payment.amount === "number" ? payment.amount : null,
+      })
+      .maybeSingle<{ order_id: string; newly_paid: boolean }>();
     if (error) {
       // Payments for orders this store didn't create (another site on the same account) are ignored.
       if (error.code === "P0002") return Response.json({ ok: true, ignored: true });
       console.error("Webhook could not mark order paid:", error.message);
       return new Response("retry", { status: 500 }); // Razorpay retries later
     }
+    // Also covers a receipt that failed earlier: only one caller can ever send it.
+    if (data?.order_id) after(() => sendOrderConfirmation(data.order_id));
     return Response.json({ ok: true });
   }
 

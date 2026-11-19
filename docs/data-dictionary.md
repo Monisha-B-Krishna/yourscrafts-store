@@ -71,7 +71,12 @@ Line revenue = `price_snapshot * qty`. For revenue reports, filter `payment_stat
 | `stock_short` | `true` if the last unit sold out between Pay and payment. Refund or offer an alternative |
 | `subtotal`, `discount`, `shipping_fee`, `total` | Paise. `total = subtotal - discount + shipping_fee`. Free shipping is judged on `subtotal` (before the coupon) |
 
+| `confirmation_email_sent_at` | When the receipt email was sent (null = not sent, e.g. emails not set up) |
+
 Count real sales with `where payment_status = 'paid'`; everything else is an abandoned checkout.
+
+`order_status_history` has one row per status change (`placed` is added automatically on payment), so you can
+measure, for example, hours from `placed` to `shipped`.
 
 ## Settings
 

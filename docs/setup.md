@@ -101,6 +101,28 @@ signature before marking anything paid. Stock goes down only after payment is co
 don't finish, it stays `pending` (or `failed`). These are abandoned checkouts: useful for analysis, but not orders to
 pack. Only **paid** orders get a number like `YCW-2026-00001`.
 
+## 6. Switch on order emails (Phase 5, optional)
+
+Customers get a branded receipt the moment their payment is confirmed, with a **Track your order** button.
+(Status emails like "Your order has shipped" arrive with the admin panel in Phase 6.)
+
+1. Sign up free at [resend.com](https://resend.com) and create an API key (**API Keys → Create**). Put it in
+   `RESEND_API_KEY`.
+2. **To email real customers you need your own domain** verified in Resend (**Domains → Add domain**, then add
+   the DNS records it shows). Then set `EMAIL_FROM`, e.g. `Yours Crafts Woman <orders@yourdomain.in>`.
+   Until then, Resend only delivers to your own Resend login email, which is perfect for testing.
+3. Optional: set `EMAIL_REPLY_TO` to your Gmail so replies reach you.
+
+Without a key, everything still works: the confirmation page tells customers to bookmark it as their receipt,
+and they can always look up an order at **/track** with the order number and email.
+
+## Order tracking
+
+- **Signed-in customers:** My account → Orders lists every paid order; each opens its tracking page.
+- **Guests:** **Track an order** in the footer (`/track`), using the order number and checkout email.
+- **Email/confirmation links** open the order directly; the secret `key` in the link is what lets them in, so
+  only the buyer has it.
+
 ## Useful commands
 
 | Command | What it does |

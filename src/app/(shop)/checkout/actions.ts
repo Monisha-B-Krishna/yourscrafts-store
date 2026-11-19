@@ -1,10 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { getProfile, getCurrentUser } from "@/lib/auth";
 import { createAddress, listAddresses } from "@/lib/addresses";
 import type { CartQuote } from "@/lib/cart/quote";
 import { cleanLines, priceCheckout } from "@/lib/checkout/server";
 import { MIN_PAYMENT, type CheckoutTotals } from "@/lib/checkout/totals";
+import { sendOrderConfirmation } from "@/lib/email/order-emails";
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fieldErrors, type FieldErrors } from "@/lib/validation/account";
@@ -190,11 +192,13 @@ export async function confirmPaymentAction(input: unknown): Promise<ConfirmPayme
   if (!admin) return { ok: false, message: TRY_AGAIN };
   const { data, error } = await admin
     .rpc("mark_order_paid", { p_razorpay_order_id: razorpay_order_id, p_razorpay_payment_id: razorpay_payment_id })
-    .single<{ order_id: string; order_number: string; access_key: string }>();
+    .single<{ order_id: string; order_number: string; access_key: string; newly_paid: boolean }>();
   if (error || !data) {
     console.error("mark_order_paid failed:", error?.message);
     return { ok: false, message: "Your payment went through, but we couldn't finish saving your order. Please message us on WhatsApp." };
   }
+  // The receipt email goes out after the response, so the customer isn't kept waiting.
+  if (data.newly_paid) after(() => sendOrderConfirmation(data.order_id));
   return { ok: true, orderId: data.order_id, accessKey: data.access_key, orderNumber: data.order_number };
 }
 

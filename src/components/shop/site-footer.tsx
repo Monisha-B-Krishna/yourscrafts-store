@@ -42,6 +42,7 @@ export async function SiteFooter() {
               { href: "/search", label: "Search" },
               { href: "/saved", label: "Saved for later" },
               { href: "/cart", label: "Your cart" },
+              { href: "/track", label: "Track an order" },
             ].map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className="text-muted-ink hover:text-ink">

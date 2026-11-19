@@ -3,9 +3,11 @@ import Link from "next/link";
 import { CheckCircle2Icon, ClockIcon } from "lucide-react";
 import { getSettings } from "@/lib/catalog";
 import { getOrderForConfirmation } from "@/lib/checkout/server";
-import { DISPATCH_DAYS, TRANSIT_DAYS, formatDeliveryDate } from "@/lib/delivery";
+import { isEmailConfigured } from "@/lib/email/send";
+import { formatDeliveryDate } from "@/lib/delivery";
+import { orderLink } from "@/lib/orders/server";
+import { expectedDelivery } from "@/lib/orders/timeline";
 import { formatINR } from "@/lib/pricing";
-import type { ProductType } from "@/lib/types";
 import { formatIndianPhone } from "@/lib/validation/account";
 import { whatsappLink } from "@/lib/whatsapp";
 import { FormMessage } from "@/components/shop/form/field";
@@ -13,7 +15,6 @@ import { FormMessage } from "@/components/shop/form/field";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const placedFormat = new Intl.DateTimeFormat("en-IN", {
   day: "numeric",
   month: "long",
@@ -48,12 +49,11 @@ export default async function OrderConfirmedPage({
   }
 
   // Expected timeline: the slowest item sets the dispatch time.
-  const types = order.items.map((i) => (i.product?.type ?? "product") as ProductType);
-  const dispatchMax = Math.max(...types.map((t) => DISPATCH_DAYS[t]?.[1] ?? DISPATCH_DAYS.product[1]));
-  const dispatchMin = Math.max(...types.map((t) => DISPATCH_DAYS[t]?.[0] ?? DISPATCH_DAYS.product[0]));
   const placed = new Date(order.paid_at ?? order.created_at);
-  const earliest = new Date(placed.getTime() + (dispatchMin + TRANSIT_DAYS[0]) * DAY_MS);
-  const latest = new Date(placed.getTime() + (dispatchMax + TRANSIT_DAYS[1]) * DAY_MS);
+  const { dispatchMin, dispatchMax, earliest, latest } = expectedDelivery(
+    order.items.map((i) => i.product?.type),
+    placed,
+  );
   const help = whatsappLink(settings.whatsapp_number, `Hi Monisha! A question about my order ${order.order_number}: `);
   const a = order.shipping_address;
 
@@ -66,7 +66,10 @@ export default async function OrderConfirmedPage({
           Your order <strong className="font-semibold text-ink">{order.order_number}</strong> is confirmed.
         </p>
         <p className="mt-1 text-sm text-muted-ink">
-          Placed {placedFormat.format(placed)}. Bookmark this page: it&rsquo;s your receipt.
+          Placed {placedFormat.format(placed)}.{" "}
+          {isEmailConfigured()
+            ? `A receipt is on its way to ${order.email}.`
+            : "Bookmark this page: it’s your receipt."}
         </p>
       </div>
 
@@ -153,8 +156,14 @@ export default async function OrderConfirmedPage({
 
       <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Link
-          href="/shop"
+          href={orderLink(order.order_number, key)}
           className="inline-flex h-12 items-center rounded-full bg-ink px-7 font-medium text-cream hover:bg-ink/85"
+        >
+          Track your order
+        </Link>
+        <Link
+          href="/shop"
+          className="inline-flex h-12 items-center rounded-full border border-ink/20 px-7 font-medium hover:bg-peach-soft"
         >
           Continue shopping
         </Link>
@@ -162,7 +171,7 @@ export default async function OrderConfirmedPage({
           href={help}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-12 items-center rounded-full border border-ink/20 px-7 font-medium hover:bg-peach-soft"
+          className="inline-flex h-12 items-center px-4 font-medium underline underline-offset-4"
         >
           Questions? WhatsApp us
         </a>
