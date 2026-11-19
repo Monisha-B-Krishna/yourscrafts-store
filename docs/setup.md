@@ -123,6 +123,24 @@ and they can always look up an order at **/track** with the order number and ema
 - **Email/confirmation links** open the order directly; the secret `key` in the link is what lets them in, so
   only the buyer has it.
 
+## 7. Your admin panel (Phase 6)
+
+Sign in with your `ADMIN_EMAIL` account and open **/admin** (or My account → *Open the admin panel*).
+
+| Section | What it's for |
+|---|---|
+| Dashboard | Sales today and this month, average order, orders waiting to be packed, low stock, top sellers |
+| Orders | Search and filter; open an order to change its status (optionally emailing the customer), add courier and tracking, keep private notes, print a packing slip |
+| Products / Artworks | Add, edit, duplicate, archive. Photos are shrunk automatically; drag to reorder; the first is the main photo |
+| Deals & coupons | Deals lower shop prices for a category or product between two dates; coupons are codes typed at checkout |
+| Editions | Named collections like *Diwali Edition*, each with its own shop page (`/shop?collection=…`) |
+| Customers | Everyone with an account plus guests who paid, with orders and total spent |
+| Settings | WhatsApp number, shipping charge, free-shipping amount, announcement bar, Instagram link, cancel window |
+| Download data | CSV files of orders, items, status history, products, customers and events |
+
+Refunds are made in the Razorpay dashboard; then mark the order **Cancelled** here (tick *Put the items back in stock*
+if the pieces can be sold again).
+
 ## Useful commands
 
 | Command | What it does |

@@ -34,7 +34,9 @@ name (prefixes count, so "choc" finds chocolate); if nothing matches all words, 
 any word are returned.
 | `collections` | A named edition, e.g. "Diwali Edition 2026" | `starts_at`, `ends_at`, `is_active`, `banner_image` |
 | `collection_products` | Membership of a product in a collection | `collection_id`, `product_id` |
-| `deals` | A time-boxed discount on one product or one category | `type` (`percentage` / `flat`), `value` (percent points, or paise when flat), `product_id` **or** `category_id`, `starts_at`, `ends_at` |
+| `deals` | A time-boxed discount on one product or one category (and its sub-categories) | `type` (`percentage` / `flat`), `value` (percent points, or paise when flat), `product_id` **or** `category_id`, `starts_at`, `ends_at`, `is_active` |
+
+**Deal prices:** the API exposes `products.deal_price` (a computed field, function `public.deal_price(products)`): the price after the best live deal, or null. Customers pay the lowest of `price`, `sale_price` and `deal_price`; that price is what `order_items.price_snapshot` records. Note: `effective_price` (used for the shop's price filter and sort) ignores deals.
 | `coupons` | A checkout code | `code` (upper case), `type`, `value`, `min_order` (paise), `usage_limit`, `used_count` |
 
 ## Customers

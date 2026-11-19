@@ -22,6 +22,11 @@ const shopParamsSchema = z.object({
     .regex(/^[a-z0-9-]{1,80}$/)
     .optional()
     .catch(undefined),
+  collection: z
+    .string()
+    .regex(/^[a-z0-9-]{1,80}$/)
+    .optional()
+    .catch(undefined),
   min: optionalRupees,
   max: optionalRupees,
   stock: z
@@ -35,6 +40,8 @@ const shopParamsSchema = z.object({
 
 export interface ProductQuery {
   category?: string;
+  /** An edition (collection) slug, e.g. diwali-edition. */
+  collection?: string;
   /** Prices in paise. */
   minPrice?: number;
   maxPrice?: number;
@@ -51,6 +58,7 @@ export function parseShopParams(params: RawParams): ProductQuery {
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
   const parsed = shopParamsSchema.parse({
     category: first(params.category),
+    collection: first(params.collection),
     min: first(params.min),
     max: first(params.max),
     stock: first(params.stock),
@@ -63,6 +71,7 @@ export function parseShopParams(params: RawParams): ProductQuery {
 
   return {
     category: parsed.category,
+    collection: parsed.collection,
     minPrice: min === undefined ? undefined : min * 100,
     maxPrice: max === undefined ? undefined : max * 100,
     inStock: parsed.stock,
@@ -80,7 +89,7 @@ export const PRICE_PRESETS = [
   { label: "Over ₹2,000", min: 2000, max: undefined },
 ] as const;
 
-type ShopLinkState = Pick<ProductQuery, "category" | "minPrice" | "maxPrice" | "inStock" | "sort"> & { page?: number };
+type ShopLinkState = Pick<ProductQuery, "category" | "collection" | "minPrice" | "maxPrice" | "inStock" | "sort"> & { page?: number };
 
 /**
  * A clean /shop URL for a given filter state, leaving out defaults so links
@@ -89,6 +98,7 @@ type ShopLinkState = Pick<ProductQuery, "category" | "minPrice" | "maxPrice" | "
 export function shopHref(state: ShopLinkState): string {
   const params = new URLSearchParams();
   if (state.category) params.set("category", state.category);
+  if (state.collection) params.set("collection", state.collection);
   if (state.minPrice !== undefined) params.set("min", String(Math.round(state.minPrice / 100)));
   if (state.maxPrice !== undefined) params.set("max", String(Math.round(state.maxPrice / 100)));
   if (state.inStock) params.set("stock", "1");

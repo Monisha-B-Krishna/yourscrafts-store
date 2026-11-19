@@ -15,7 +15,7 @@ import type { Category, Collection, Product } from "@/lib/types";
  */
 
 export const PRODUCT_COLUMNS = `
-  id, name, slug, description, category_id, type, price, sale_price, stock, tags,
+  id, name, slug, description, category_id, type, price, sale_price, deal_price, stock, tags,
   is_featured, sales_count, dimensions, created_at,
   images:product_images (url, alt, sort_order),
   variants:product_variants (id, name, price_delta, stock),
@@ -69,6 +69,11 @@ export async function listProducts(q: ProductQuery): Promise<{ items: Product[];
     if (!category) return { items: [], total: 0 };
     query = query.eq("category_id", category.id);
   }
+  if (q.collection) {
+    const ids = await getCollectionProductIds(q.collection);
+    if (ids === null || ids.length === 0) return { items: [], total: 0 };
+    query = query.in("id", ids);
+  }
   if (q.minPrice !== undefined) query = query.gte("effective_price", q.minPrice);
   if (q.maxPrice !== undefined) query = query.lte("effective_price", q.maxPrice);
   if (q.inStock) query = query.gt("stock", 0);
@@ -119,7 +124,7 @@ export async function getHomeProducts(list: HomeList, limit = 8): Promise<Produc
   if (list === "bestsellers")
     query = query.eq("type", "product").order("sales_count", { ascending: false });
   if (list === "deals")
-    query = query.not("sale_price", "is", null).order("sales_count", { ascending: false });
+    query = query.or("sale_price.not.is.null,deal_price.not.is.null").order("sales_count", { ascending: false });
   if (list === "artwork")
     query = query
       .in("type", ["original_art", "print"])
@@ -228,6 +233,19 @@ export async function getArtworks(): Promise<Product[]> {
   if (error) fail("artworks", error);
   return ((data ?? []) as unknown as Product[]).map(normaliseProduct);
 }
+
+/** Products in a live edition, or null if there's no such live edition. */
+const getCollectionProductIds = cache(async (slug: string): Promise<string[] | null> => {
+  if (!SLUG_PATTERN.test(slug)) return null;
+  const { data, error } = await createPublicClient()
+    .from("collections")
+    .select("id, items:collection_products (product_id)")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) fail("edition", error);
+  if (!data) return null;
+  return (data.items as { product_id: string }[]).map((i) => i.product_id);
+});
 
 export const getActiveCollections = cache(async (): Promise<Collection[]> => {
   if (isDemoMode()) return buildDemoCollections();

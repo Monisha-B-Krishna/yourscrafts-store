@@ -171,8 +171,9 @@ describe.skipIf(!reachable)("local Supabase: checkout & payments", () => {
 
   it("lets a customer retry after a failed attempt, logging each failure once", async () => {
     const { id, rzp, total } = await pendingOrder([{ product_id: plain, price: 30000, qty: 1 }]);
+    const failId = `pay_fail${randomUUID().slice(0, 8)}`;
     for (let i = 0; i < 2; i++) {
-      await admin.rpc("record_payment_failure", { p_razorpay_order_id: rzp, p_razorpay_payment_id: "pay_failedOnce1", p_reason: "payment_failed" });
+      await admin.rpc("record_payment_failure", { p_razorpay_order_id: rzp, p_razorpay_payment_id: failId, p_reason: "payment_failed" });
     }
     const { data: failed } = await admin.from("orders").select("payment_status").eq("id", id).single();
     expect(failed!.payment_status).toBe("failed");
@@ -181,7 +182,7 @@ describe.skipIf(!reachable)("local Supabase: checkout & payments", () => {
 
     expect((await pay(rzp, total)).data!.newly_paid).toBe(true);
     // A late failure report can't undo a successful payment.
-    await admin.rpc("record_payment_failure", { p_razorpay_order_id: rzp, p_razorpay_payment_id: "pay_lateFail22", p_reason: "x" });
+    await admin.rpc("record_payment_failure", { p_razorpay_order_id: rzp, p_razorpay_payment_id: `pay_late${randomUUID().slice(0, 8)}`, p_reason: "x" });
     const { data: paid } = await admin.from("orders").select("payment_status").eq("id", id).single();
     expect(paid!.payment_status).toBe("paid");
   });
@@ -274,7 +275,7 @@ describe.skipIf(!reachable)("local Supabase: order emails & tracking", () => {
   it("lets exactly one caller claim the receipt email, and only once paid", async () => {
     const { id, rzp } = await paidOrder();
     expect((await admin.rpc("claim_confirmation_email", { p_order_id: id })).data).toBe(false); // not paid yet
-    await admin.rpc("mark_order_paid", { p_razorpay_order_id: rzp, p_razorpay_payment_id: "pay_claimtest1" });
+    await admin.rpc("mark_order_paid", { p_razorpay_order_id: rzp, p_razorpay_payment_id: `pay_claim${randomUUID().slice(0, 8)}` });
     const claims = await Promise.all([1, 2, 3].map(() => admin.rpc("claim_confirmation_email", { p_order_id: id })));
     expect(claims.map((c) => c.data).filter(Boolean)).toHaveLength(1);
     await admin.rpc("release_confirmation_email", { p_order_id: id });

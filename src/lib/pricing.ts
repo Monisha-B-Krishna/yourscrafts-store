@@ -21,24 +21,32 @@ export function rupeesToPaise(rupees: number): Paise {
   return Math.round(rupees * 100);
 }
 
-/** The price a customer actually pays for one unit (before coupons). */
-export function effectivePrice(p: { price: Paise; sale_price: Paise | null }): Paise {
-  return p.sale_price !== null && p.sale_price < p.price ? p.sale_price : p.price;
+type Priced = { price: Paise; sale_price: Paise | null; deal_price?: Paise | null };
+
+/**
+ * The price a customer actually pays for one unit (before coupons): the
+ * lowest of the full price, the sale price and any live deal (admin → Deals).
+ */
+export function effectivePrice(p: Priced): Paise {
+  let best = p.price;
+  if (p.sale_price !== null && p.sale_price < best) best = p.sale_price;
+  if (p.deal_price !== null && p.deal_price !== undefined && p.deal_price < best) best = Math.max(0, p.deal_price);
+  return best;
 }
 
-export function isOnSale(p: { price: Paise; sale_price: Paise | null }): boolean {
+export function isOnSale(p: Priced): boolean {
   return effectivePrice(p) < p.price;
 }
 
 /** Whole-number percentage saved, e.g. 20 for 20% off. 0 when not on sale. */
-export function discountPercent(p: { price: Paise; sale_price: Paise | null }): number {
+export function discountPercent(p: Priced): number {
   if (!isOnSale(p)) return 0;
   return Math.round(((p.price - effectivePrice(p)) / p.price) * 100);
 }
 
 /** Price of one unit of a product, including the chosen variant's price difference. */
 export function unitPrice(
-  p: { price: Paise; sale_price: Paise | null },
+  p: Priced,
   variant?: { price_delta: Paise } | null,
 ): Paise {
   return Math.max(0, effectivePrice(p) + (variant?.price_delta ?? 0));
@@ -46,18 +54,14 @@ export function unitPrice(
 
 /** The pre-sale price to show struck through, or null when not on sale. */
 export function compareAtPrice(
-  p: { price: Paise; sale_price: Paise | null },
+  p: Priced,
   variant?: { price_delta: Paise } | null,
 ): Paise | null {
   return isOnSale(p) ? p.price + (variant?.price_delta ?? 0) : null;
 }
 
 /** Lowest price across a product's variants, for "From ₹X" labels. */
-export function fromPrice(p: {
-  price: Paise;
-  sale_price: Paise | null;
-  variants: { price_delta: Paise }[];
-}): Paise {
+export function fromPrice(p: Priced & { variants: { price_delta: Paise }[] }): Paise {
   if (p.variants.length === 0) return effectivePrice(p);
   return Math.min(...p.variants.map((v) => unitPrice(p, v)));
 }

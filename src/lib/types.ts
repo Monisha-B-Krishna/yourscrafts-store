@@ -33,6 +33,8 @@ export interface Product {
   type: ProductType;
   price: Paise;
   sale_price: Paise | null;
+  /** Price after the best live deal (admin → Deals), or null when no deal applies. */
+  deal_price?: Paise | null;
   stock: number;
   tags: string[];
   is_featured: boolean;

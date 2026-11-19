@@ -5,7 +5,7 @@ import { Pagination } from "@/components/shop/pagination";
 import { ProductGrid } from "@/components/shop/product-card";
 import { ActiveFilters, ShopFilters } from "@/components/shop/shop-filters";
 import { SortSelect } from "@/components/shop/sort-select";
-import { getCategories, listProducts } from "@/lib/catalog";
+import { getActiveCollections, getCategories, listProducts } from "@/lib/catalog";
 import { parseShopParams, shopHref } from "@/lib/shop-query";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +14,9 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const query = parseShopParams(await searchParams);
   const category = (await getCategories()).find((c) => c.slug === query.category);
+  const edition = query.collection ? (await getActiveCollections()).find((c) => c.slug === query.collection) : undefined;
   return {
-    title: category ? category.name : "Shop all",
+    title: edition ? edition.name : category ? category.name : "Shop all",
     description: category
       ? `Shop handmade ${category.name.toLowerCase()} by Yours Crafts Woman.`
       : "Shop handmade gifts, hampers, decor and original art by Yours Crafts Woman.",
@@ -25,9 +26,14 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 export default async function ShopPage({ searchParams }: { searchParams: SearchParams }) {
   const raw = await searchParams;
   const query = parseShopParams(raw);
-  const [categories, { items, total }] = await Promise.all([getCategories(), listProducts(query)]);
+  const [categories, collections, { items, total }] = await Promise.all([
+    getCategories(),
+    getActiveCollections(),
+    listProducts(query),
+  ]);
 
   const category = categories.find((c) => c.slug === query.category);
+  const edition = query.collection ? collections.find((c) => c.slug === query.collection) : undefined;
   const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
   const activeFilters =
     (query.category ? 1 : 0) +
@@ -37,6 +43,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   // Canonical params (validated) to carry through pagination links.
   const keep: Record<string, string> = {};
   if (query.category) keep.category = query.category;
+  if (query.collection) keep.collection = query.collection;
   if (query.minPrice !== undefined) keep.min = String(query.minPrice / 100);
   if (query.maxPrice !== undefined) keep.max = String(query.maxPrice / 100);
   if (query.inStock) keep.stock = "1";
@@ -46,7 +53,18 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8">
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl">{category ? category.name : "Shop all"}</h1>
+      {edition && (
+        <p className="mb-2 text-sm tracking-widest text-peach-deep uppercase">Edition</p>
+      )}
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl">
+        {edition ? edition.name : category ? category.name : "Shop all"}
+      </h1>
+      {edition?.description && <p className="mt-3 max-w-2xl text-muted-ink">{edition.description}</p>}
+      {query.collection && (
+        <Link href={shopHref({ ...query, collection: undefined, page: 1 })} className="mt-2 inline-block text-sm underline underline-offset-2">
+          {edition ? "See everything in the shop" : "This edition has ended. See everything in the shop"}
+        </Link>
+      )}
       <p className="mt-2 text-muted-ink">
         {total} {total === 1 ? "piece" : "pieces"}, all handmade
       </p>

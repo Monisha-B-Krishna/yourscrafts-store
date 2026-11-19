@@ -35,9 +35,12 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-8 sm:px-6 sm:pt-14 lg:grid-cols-2 lg:gap-16 lg:px-8">
           <div className="max-w-xl">
             {edition && (
-              <p className="mb-4 inline-flex rounded-full bg-peach-soft px-3 py-1 text-sm text-ink">
-                ✿ {edition.name} is here
-              </p>
+              <Link
+                href={`/shop?collection=${edition.slug}`}
+                className="mb-4 inline-flex rounded-full bg-peach-soft px-3 py-1 text-sm text-ink hover:bg-peach/40"
+              >
+                ✿ {edition.name} is here: shop it →
+              </Link>
             )}
             <h1 id="hero-title" className="text-4xl leading-[1.1] sm:text-5xl lg:text-6xl">
               Handmade gifts, made to be remembered.
