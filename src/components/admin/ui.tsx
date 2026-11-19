@@ -37,15 +37,21 @@ export function Card({
   children,
   className,
   action,
+  scrollLabel,
 }: {
   title?: string;
   description?: ReactNode;
   children: ReactNode;
   className?: string;
   action?: ReactNode;
+  /** For a card that scrolls sideways (wide tables): makes it reachable and named for keyboard users. */
+  scrollLabel?: string;
 }) {
   return (
-    <section className={cn("rounded-3xl border border-border/70 bg-white p-5 sm:p-6", className)}>
+    <section
+      className={cn("rounded-3xl border border-border/70 bg-white p-5 sm:p-6", scrollLabel && "focus-visible:outline-2 focus-visible:outline-ring", className)}
+      {...(scrollLabel ? { tabIndex: 0, "aria-label": scrollLabel } : {})}
+    >
       {(title || action) && (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
@@ -97,7 +103,7 @@ export function Pill({ children, tone = "soft" }: { children: ReactNode; tone?: 
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
         tone === "soft" && "bg-peach-soft text-ink",
         tone === "ink" && "bg-ink text-cream",
-        tone === "muted" && "bg-muted text-muted-ink",
+        tone === "muted" && "bg-muted text-ink/80",
         tone === "warn" && "bg-destructive/10 text-destructive",
         tone === "good" && "bg-emerald-50 text-emerald-800",
       )}

@@ -38,7 +38,6 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
         }}
         onPointerLeave={() => setHoverOrigin(null)}
         className="group relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-3xl bg-peach-soft"
-        aria-label={`Open full-screen view of ${current.alt || productName}`}
       >
         <Image
           src={current.url}

@@ -103,8 +103,8 @@ pack. Only **paid** orders get a number like `YCW-2026-00001`.
 
 ## 6. Switch on order emails (Phase 5, optional)
 
-Customers get a branded receipt the moment their payment is confirmed, with a **Track your order** button.
-(Status emails like "Your order has shipped" arrive with the admin panel in Phase 6.)
+Customers get a branded receipt the moment their payment is confirmed, with a **Track your order** button,
+and an email each time you change the order's status in the admin panel (you can untick that per update).
 
 1. Sign up free at [resend.com](https://resend.com) and create an API key (**API Keys → Create**). Put it in
    `RESEND_API_KEY`.
@@ -141,6 +141,11 @@ Sign in with your `ADMIN_EMAIL` account and open **/admin** (or My account → *
 Refunds are made in the Razorpay dashboard; then mark the order **Cancelled** here (tick *Put the items back in stock*
 if the pieces can be sold again).
 
+## 8. Go live
+
+Putting the shop online (Vercel, the hosted database, Razorpay webhook, Google) is a checklist of its own:
+[`go-live.md`](go-live.md). Day-to-day running of the shop is in [`owner-manual.md`](owner-manual.md).
+
 ## Useful commands
 
 | Command | What it does |
@@ -149,6 +154,7 @@ if the pieces can be sold again).
 | `npm run build` | Production build (what Vercel runs) |
 | `npm run lint` | Check code style |
 | `npm test` | Run the automated tests (the database tests run only while the local database is up) |
+| `npm run test:e2e` | Browser tests of buying and of the admin panel (local database only, see `tests/e2e/README.md`) |
 | `npm run seed:generate` | Rebuild `supabase/seed.sql` from `src/lib/seed/data.ts` |
 | `npm run placeholders:generate` | Redraw the placeholder product images |
 | `npm run db:start` / `db:reset` | Start, or wipe and reseed, the local database |

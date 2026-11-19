@@ -115,6 +115,7 @@ export function SearchBox({
   return (
     <form
       role="search"
+      aria-label="Site search"
       action="/search"
       method="get"
       onSubmit={onSubmit}

@@ -11,6 +11,8 @@ import { ProductViewTracker } from "@/components/shop/trackers";
 import { getProductBySlug, getRelatedProducts, getSettings } from "@/lib/catalog";
 import { estimateDelivery, formatDeliveryDate } from "@/lib/delivery";
 import { siteUrl } from "@/lib/env";
+import { jsonLd } from "@/lib/json-ld";
+import { effectivePrice, unitPrice } from "@/lib/pricing";
 import { INTERNATIONAL_MESSAGE, whatsappLink } from "@/lib/whatsapp";
 
 // Product pages are built on first visit, cached, and refreshed at most once a minute.
@@ -37,9 +39,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description,
     alternates: { canonical: `/product/${product.slug}` },
     openGraph: {
+      type: "website",
       title: product.name,
       description,
-      images: product.images[0] ? [{ url: product.images[0].url, alt: product.images[0].alt }] : [],
+      // Real photos where possible; SVG placeholders can't be shown in previews, so use a branded card.
+      images: product.images[0] && !product.images[0].url.endsWith(".svg")
+        ? [{ url: product.images[0].url, alt: product.images[0].alt || product.name }]
+        : [{ url: `/product/${product.slug}/og`, width: 1200, height: 630, alt: product.name }],
     },
   };
 }
@@ -53,8 +59,33 @@ export default async function ProductPage({ params }: { params: Params }) {
   const productUrl = `${siteUrl}/product/${product.slug}`;
   const customMessage = `Hi Monisha! I love the ${product.name} (${productUrl}). Could you make a custom version for me? Here's what I have in mind: `;
 
+  // What Google shows in search results: price, stock, photos (schema.org/Product).
+  const absolute = (url: string) => (url.startsWith("http") ? url : `${siteUrl}${url}`);
+  const prices = product.variants.length ? product.variants.map((v) => unitPrice(product, v)) : [effectivePrice(product)];
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((i) => absolute(i.url)),
+    sku: product.id,
+    brand: { "@type": "Brand", name: "Yours Crafts Woman" },
+    category: product.category?.name,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "INR",
+      lowPrice: (Math.min(...prices) / 100).toFixed(2),
+      highPrice: (Math.max(...prices) / 100).toFixed(2),
+      offerCount: prices.length,
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: productUrl,
+      seller: { "@type": "Organization", name: "Yours Crafts Woman" },
+    },
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      {jsonLd(structured)}
       <nav aria-label="Breadcrumb" className="mb-6 overflow-x-auto text-sm">
         <ol className="flex items-center gap-1.5 whitespace-nowrap text-muted-ink">
           {[

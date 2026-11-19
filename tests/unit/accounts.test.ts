@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isOwnerAccount } from "@/lib/auth/admin-role";
 import { loginHref, safeNextPath } from "@/lib/auth/redirect";
-import { nextSyncStep } from "@/lib/cart/sync";
+import { hasAuthCookie, nextSyncStep } from "@/lib/cart/sync";
 import {
   addressSchema,
   formatIndianPhone,
@@ -141,6 +141,18 @@ describe("cart sync decisions", () => {
   it("clears the copy after sign-out, and leaves guests alone", () => {
     expect(nextSyncStep("user-a", null)).toBe("clear");
     expect(nextSyncStep(null, null)).toBe("none");
+  });
+});
+
+describe("sign-in cookie check", () => {
+  it("spots Supabase session cookies, whole or split", () => {
+    expect(hasAuthCookie("sb-abcd-auth-token=base64-xyz")).toBe(true);
+    expect(hasAuthCookie("theme=a; sb-127-auth-token.0=base64-xyz; x=1")).toBe(true);
+  });
+  it("ignores guests and look-alike names", () => {
+    expect(hasAuthCookie("")).toBe(false);
+    expect(hasAuthCookie("ycw_cart=1; sb-abcd-auth-token-code-verifier=abc")).toBe(false);
+    expect(hasAuthCookie("sb-abcd-auth-token=")).toBe(false);
   });
 });
 

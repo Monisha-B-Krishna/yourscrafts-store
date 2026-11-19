@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "About the artist",
   description:
     "Meet Monisha, the artist behind Yours Crafts Woman. Original paintings, art prints and handmade gifts, made by hand in India.",
+  alternates: { canonical: "/artist" },
 };
 
 const COMMISSION_MESSAGE =
@@ -115,7 +116,8 @@ export default async function ArtistPage() {
                   <div className={cn("relative w-full", TILE_SHAPES[i % TILE_SHAPES.length])}>
                     <Image
                       src={item.url}
-                      alt={item.alt || item.product.name}
+                      // The caption below already names the painting; repeat it only if the alt says more.
+                      alt={item.alt && item.alt !== item.product.name ? item.alt : ""}
                       fill
                       sizes="(min-width: 1024px) 24vw, (min-width: 768px) 32vw, 48vw"
                       unoptimized={item.url.endsWith(".svg")}

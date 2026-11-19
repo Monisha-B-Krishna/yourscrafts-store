@@ -257,3 +257,30 @@ export const getActiveCollections = cache(async (): Promise<Collection[]> => {
   if (error) fail("collections", error);
   return data ?? [];
 });
+
+/** Everything Google should know about, for the sitemap. */
+export async function getSitemapData(): Promise<{
+  products: { slug: string; updated_at: string }[];
+  categories: string[];
+  collections: string[];
+}> {
+  if (isDemoMode()) {
+    return {
+      products: buildDemoProducts().map((p) => ({ slug: p.slug, updated_at: p.created_at })),
+      categories: demoCategories.map((c) => c.slug),
+      collections: buildDemoCollections().map((c) => c.slug),
+    };
+  }
+  const client = createPublicClient();
+  const [products, categories, collections] = await Promise.all([
+    client.from("products").select("slug, updated_at").order("updated_at", { ascending: false }).limit(5000),
+    getCategories(),
+    getActiveCollections(),
+  ]);
+  if (products.error) fail("sitemap products", products.error);
+  return {
+    products: products.data ?? [],
+    categories: categories.map((c) => c.slug),
+    collections: collections.map((c) => c.slug),
+  };
+}

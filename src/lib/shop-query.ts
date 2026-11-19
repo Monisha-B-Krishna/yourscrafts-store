@@ -2,14 +2,9 @@ import { z } from "zod";
 import { effectivePrice } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
 
-export const SORT_OPTIONS = [
-  { value: "new", label: "Newest" },
-  { value: "popular", label: "Most popular" },
-  { value: "price-asc", label: "Price: low to high" },
-  { value: "price-desc", label: "Price: high to low" },
-] as const;
-
-export type SortOption = (typeof SORT_OPTIONS)[number]["value"];
+// Kept in its own tiny file so the sort menu (a browser component) doesn't pull in zod.
+export { SORT_OPTIONS, type SortOption } from "./shop-sort";
+import type { SortOption } from "./shop-sort";
 
 export const PAGE_SIZE = 12;
 

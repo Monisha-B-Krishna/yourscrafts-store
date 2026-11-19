@@ -64,7 +64,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-rupee), var(--font-inter);
   --font-serif: var(--font-playfair);
   --font-heading: var(--font-playfair);
 
@@ -97,4 +97,37 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+}
+
+/* Readable long text on the help pages (Shipping, Returns, Privacy, Terms). */
+.prose-info {
+  line-height: 1.7;
+  color: var(--ink);
+}
+.prose-info h2 {
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+.prose-info p,
+.prose-info ul {
+  margin-bottom: 1rem;
+}
+.prose-info ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.prose-info li {
+  margin-bottom: 0.35rem;
+}
+.prose-info a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-info strong {
+  font-weight: 600;
+}
+.prose-info .not-prose a {
+  text-decoration: none;
 }

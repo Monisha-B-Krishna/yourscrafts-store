@@ -4,6 +4,8 @@ import { InstagramIcon, WhatsAppIcon } from "@/components/shop/icons";
 import { ProductGrid } from "@/components/shop/product-card";
 import { Section } from "@/components/shop/section";
 import { getActiveCollections, getHomeProducts, getSettings } from "@/lib/catalog";
+import { siteUrl } from "@/lib/env";
+import { jsonLd } from "@/lib/json-ld";
 import { instagramImages, productImageUrl } from "@/lib/seed/data";
 import { CUSTOM_ORDER_MESSAGE, whatsappLink } from "@/lib/whatsapp";
 
@@ -30,6 +32,14 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16 sm:space-y-24">
+      {jsonLd({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "Yours Crafts Woman",
+        url: siteUrl,
+        description: "Handmade gifts, chocolate bouquets and original paintings by Monisha, shipped across India.",
+        sameAs: [settings.instagram_url],
+      })}
       {/* Hero */}
       <section aria-labelledby="hero-title" className="overflow-hidden">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-8 sm:px-6 sm:pt-14 lg:grid-cols-2 lg:gap-16 lg:px-8">

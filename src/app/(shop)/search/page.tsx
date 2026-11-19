@@ -34,7 +34,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
       <h1 className="text-3xl sm:text-4xl lg:text-5xl">{q ? <>Results for “{q}”</> : "Search the shop"}</h1>
 
       {/* Works with or without JavaScript. */}
-      <form action="/search" method="get" role="search" className="mt-6 flex max-w-xl gap-2">
+      <form action="/search" method="get" role="search" aria-label="Search again" className="mt-6 flex max-w-xl gap-2">
         <label htmlFor="search-page-input" className="sr-only">
           Search the shop
         </label>
@@ -64,6 +64,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
       {results.length > 0 ? (
         <div className="mt-6">
+          <h2 className="sr-only">Matching products</h2>
           <ProductGrid products={results} priorityCount={4} />
         </div>
       ) : (

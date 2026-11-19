@@ -42,3 +42,11 @@ export function clearCartOwner() {
     // ignore
   }
 }
+
+/**
+ * True when the browser holds a Supabase sign-in cookie (`sb-<project>-auth-token`,
+ * possibly split into `.0`, `.1` …). Used to skip loading the sign-in library for guests.
+ */
+export function hasAuthCookie(cookieHeader: string): boolean {
+  return /(?:^|;\s*)sb-[^=;]+-auth-token(?:\.\d+)?=[^;]/.test(cookieHeader);
+}

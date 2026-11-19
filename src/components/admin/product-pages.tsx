@@ -121,7 +121,7 @@ export async function ProductListPage({ kind, searchParams }: { kind: ProductKin
               const img = [...p.images].sort((a, b) => a.sort_order - b.sort_order)[0];
               return (
                 <li key={p.id} className="flex items-center gap-4 px-4 py-3 sm:px-5">
-                  <Link href={`${base}/${p.id}`} className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-peach-soft">
+                  <Link href={`${base}/${p.id}`} tabIndex={-1} aria-hidden="true" className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-peach-soft">
                     {img && <Image src={img.url} alt="" fill sizes="64px" unoptimized={img.url.endsWith(".svg")} className="object-cover" />}
                   </Link>
                   <div className="min-w-0 flex-1">

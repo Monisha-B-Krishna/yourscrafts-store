@@ -52,7 +52,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       {rows.length === 0 ? (
         <EmptyState title={q ? "No customers match" : "No customers yet"}>Customers appear here once they sign up or pay for an order.</EmptyState>
       ) : (
-        <Card className="relative overflow-x-auto p-0 sm:p-0">
+        <Card className="relative overflow-x-auto p-0 sm:p-0" scrollLabel="Customers table">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b text-xs tracking-wide text-muted-ink uppercase">
               <tr>

@@ -17,6 +17,10 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   const edition = query.collection ? (await getActiveCollections()).find((c) => c.slug === query.collection) : undefined;
   return {
     title: edition ? edition.name : category ? category.name : "Shop all",
+    // One address per listing, whatever filters or page are chosen.
+    alternates: {
+      canonical: edition ? `/shop?collection=${edition.slug}` : category ? `/shop?category=${category.slug}` : "/shop",
+    },
     description: category
       ? `Shop handmade ${category.name.toLowerCase()} by Yours Crafts Woman.`
       : "Shop handmade gifts, hampers, decor and original art by Yours Crafts Woman.",
@@ -118,7 +122,10 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
           <ActiveFilters query={query} categories={categories} />
 
           {items.length > 0 ? (
-            <ProductGrid products={items} priorityCount={4} />
+            <>
+              <h2 className="sr-only">Products</h2>
+              <ProductGrid products={items} priorityCount={4} />
+            </>
           ) : (
             <div className="rounded-2xl bg-peach-soft/60 px-6 py-16 text-center">
               <h2 className="text-2xl">Nothing matches those filters</h2>

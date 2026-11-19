@@ -90,9 +90,26 @@ export async function SiteFooter() {
           </p>
         </div>
       </div>
-      <p className="border-t px-4 py-5 text-center text-xs text-muted-ink">
-        © {new Date().getFullYear()} Yours Crafts Woman. All prices in INR.
-      </p>
+      <div className="border-t px-4 py-5 text-center text-xs text-muted-ink">
+        <nav aria-label="Help and policies">
+          <ul className="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2">
+            {[
+              { href: "/contact", label: "Contact" },
+              { href: "/shipping", label: "Shipping" },
+              { href: "/returns", label: "Returns & refunds" },
+              { href: "/privacy", label: "Privacy" },
+              { href: "/terms", label: "Terms" },
+            ].map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="text-sm hover:text-ink">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <p>© {new Date().getFullYear()} Yours Crafts Woman. All prices in INR.</p>
+      </div>
     </footer>
   );
 }

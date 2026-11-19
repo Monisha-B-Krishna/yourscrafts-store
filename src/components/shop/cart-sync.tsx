@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import { syncCartAction } from "@/app/(shop)/cart/actions";
 import { cartStore, type CartLine } from "@/lib/cart/store";
-import { clearCartOwner, nextSyncStep, readCartOwner, writeCartOwner } from "@/lib/cart/sync";
-import { createClient } from "@/lib/supabase/client";
+import { clearCartOwner, hasAuthCookie, nextSyncStep, readCartOwner, writeCartOwner } from "@/lib/cart/sync";
 
 /**
  * Keeps a signed-in customer's cart saved in their account (CLAUDE.md §5):
@@ -17,7 +16,6 @@ import { createClient } from "@/lib/supabase/client";
 export function CartSync({ enabled }: { enabled: boolean }) {
   useEffect(() => {
     if (!enabled) return;
-    const supabase = createClient();
     let userId: string | null | undefined = undefined; // undefined until the session is known
     let queue: Promise<void> = Promise.resolve();
     let applyingSaved = false; // true while we write the saved cart into the browser
@@ -89,18 +87,40 @@ export function CartSync({ enabled }: { enabled: boolean }) {
       if (!applyingSaved) void push();
     });
 
+    // Signing in or out always reloads the page, so the cookies tell us at
+    // start-up whether anyone is signed in. Guests never download the sign-in
+    // library; for signed-in customers it loads once the page is idle.
     // INITIAL_SESSION arrives first with the current session, then SIGNED_IN /
-    // SIGNED_OUT whenever that changes (including from another tab).
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        onUser(session?.user.id ?? null);
-      }
-    });
+    // SIGNED_OUT whenever that changes.
+    let unsubscribeAuth: (() => void) | undefined;
+    async function listen() {
+      const { createClient } = await import("@/lib/supabase/client");
+      if (cancelled) return;
+      const { data } = createClient().auth.onAuthStateChange((event, session) => {
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "SIGNED_OUT") {
+          onUser(session?.user.id ?? null);
+        }
+      });
+      unsubscribeAuth = () => data.subscription.unsubscribe();
+    }
+    let handle: number | undefined;
+    const idle = typeof window.requestIdleCallback === "function";
+    if (!hasAuthCookie(document.cookie)) {
+      onUser(null);
+    } else {
+      handle = idle
+        ? window.requestIdleCallback(() => void listen(), { timeout: 3000 })
+        : window.setTimeout(() => void listen(), 1500);
+    }
 
     return () => {
       cancelled = true;
+      if (handle !== undefined) {
+        if (idle) window.cancelIdleCallback(handle);
+        else window.clearTimeout(handle);
+      }
       unsubscribeCart();
-      listener.subscription.unsubscribe();
+      unsubscribeAuth?.();
     };
   }, [enabled]);
 

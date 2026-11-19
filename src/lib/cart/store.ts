@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { z } from "zod";
 import { MAX_QTY_PER_LINE } from "./quote";
 
 /**
@@ -19,11 +18,17 @@ export interface CartLine {
 export const CART_STORAGE_KEY = "ycw_cart_v1";
 const MAX_LINES = 50;
 
-const storedLineSchema = z.object({
-  productId: z.string().min(1).max(64),
-  variantId: z.string().min(1).max(64).nullable(),
-  qty: z.number().int().min(1).max(99),
-});
+// Hand-written check (not zod) so the cart doesn't add a validation library to every page.
+const isId = (v: unknown): v is string => typeof v === "string" && v.length >= 1 && v.length <= 64;
+
+function toStoredLine(item: unknown): CartLine | null {
+  if (!item || typeof item !== "object") return null;
+  const { productId, variantId, qty } = item as Record<string, unknown>;
+  if (!isId(productId)) return null;
+  if (variantId !== null && !isId(variantId)) return null;
+  if (typeof qty !== "number" || !Number.isInteger(qty) || qty < 1 || qty > 99) return null;
+  return { productId, variantId, qty };
+}
 
 const sameLine = (a: Pick<CartLine, "productId" | "variantId">, b: Pick<CartLine, "productId" | "variantId">) =>
   a.productId === b.productId && a.variantId === b.variantId;
@@ -46,8 +51,8 @@ export function parseStoredCart(raw: string | null): CartLine[] {
   if (!Array.isArray(data)) return [];
   let lines: CartLine[] = [];
   for (const item of data) {
-    const parsed = storedLineSchema.safeParse(item);
-    if (parsed.success) lines = addLine(lines, parsed.data);
+    const line = toStoredLine(item);
+    if (line) lines = addLine(lines, line);
   }
   return lines.slice(0, MAX_LINES);
 }

@@ -22,15 +22,20 @@ export async function SiteHeader() {
       >
         Skip to content
       </a>
-      {settings.announcement_text && (
-        <p className="bg-ink px-4 py-2 text-center text-xs text-cream sm:text-sm">
-          {settings.announcement_text}
-        </p>
-      )}
-      {isDemoMode() && (
-        <p className="bg-peach-soft px-4 py-1.5 text-center text-xs text-ink">
-          Demo mode: showing example products. Add your Supabase keys to use the real database.
-        </p>
+      {(settings.announcement_text || isDemoMode()) && (
+        <aside aria-label="Store announcement">
+          {settings.announcement_text && (
+            // Two lines' room on phones, so the bar doesn't grow (and push the page down) when the font loads.
+            <p className="flex min-h-12 items-center justify-center bg-ink px-4 py-2 text-center text-xs text-cream sm:min-h-0 sm:text-sm">
+              {settings.announcement_text}
+            </p>
+          )}
+          {isDemoMode() && (
+            <p className="bg-peach-soft px-4 py-1.5 text-center text-xs text-ink">
+              Demo mode: showing example products. Add your Supabase keys to use the real database.
+            </p>
+          )}
+        </aside>
       )}
       <header className="sticky top-0 z-40 border-b bg-cream/95 backdrop-blur supports-backdrop-filter:bg-cream/80">
         {/* Phones/tablets: one row. Desktop: search · logo · actions, with the menu below. */}
