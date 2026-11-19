@@ -298,21 +298,33 @@ export function CartView() {
         </dl>
         <p className="mt-2 text-xs text-muted-ink">Have a coupon? You can add it at checkout.</p>
 
-        {/* Checkout and Razorpay payments arrive in Phase 4. */}
-        <button
-          type="button"
-          disabled
-          aria-describedby="checkout-soon"
-          className="mt-6 inline-flex h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-ink/40 px-6 font-medium text-cream"
-        >
-          <LockIcon className="size-4" aria-hidden="true" />
-          Checkout
-        </button>
-        <p id="checkout-soon" className="mt-2 text-center text-xs text-muted-ink">
-          {shown.hasIssues && shown.lines.some((l) => l.status === "sold_out" || l.status === "unavailable")
-            ? "Remove unavailable items to continue."
-            : "Checkout is being set up and opens soon."}
-        </p>
+        {(() => {
+          const blocked = shown.lines.some((l) => l.status === "sold_out" || l.status === "unavailable");
+          return blocked ? (
+            <>
+              <button
+                type="button"
+                disabled
+                aria-describedby="checkout-blocked"
+                className="mt-6 inline-flex h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-ink/40 px-6 font-medium text-cream"
+              >
+                <LockIcon className="size-4" aria-hidden="true" />
+                Checkout
+              </button>
+              <p id="checkout-blocked" className="mt-2 text-center text-xs text-muted-ink">
+                Remove unavailable items to continue.
+              </p>
+            </>
+          ) : (
+            <Link
+              href="/checkout"
+              className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink px-6 font-medium text-cream hover:bg-ink/85"
+            >
+              <LockIcon className="size-4" aria-hidden="true" />
+              Checkout
+            </Link>
+          );
+        })()}
       </aside>
     </div>
   );

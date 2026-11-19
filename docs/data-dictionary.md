@@ -59,6 +59,20 @@ any word are returned.
 
 Line revenue = `price_snapshot * qty`. For revenue reports, filter `payment_status = 'paid'`.
 
+### Order columns added in Phase 4
+
+| Column | Meaning |
+|---|---|
+| `order_number` | `YCW-YYYY-NNNNN`, given **only when paid** (null for unpaid checkouts, so paid numbers have no gaps) |
+| `payment_status` | `pending` (Pay pressed, not finished), `failed` (last attempt failed; can still be paid), `paid`, `refunded` |
+| `paid_at` | When the payment was confirmed |
+| `access_key` | Secret part of the confirmation link. Never share it or use it in analysis |
+| `checkout_session_id` | The shopper's analytics session (joins to `events.session_id`) |
+| `stock_short` | `true` if the last unit sold out between Pay and payment. Refund or offer an alternative |
+| `subtotal`, `discount`, `shipping_fee`, `total` | Paise. `total = subtotal - discount + shipping_fee`. Free shipping is judged on `subtotal` (before the coupon) |
+
+Count real sales with `where payment_status = 'paid'`; everything else is an abandoned checkout.
+
 ## Settings
 
 `store_settings` holds one row per setting as `key` + `value` (JSON):
@@ -92,7 +106,8 @@ to the table directly with the public key. Payment events are written by the ser
 | `remove_from_cart` | Removed, or quantity lowered, in the cart | `qty` (units removed), `variant_id` (or null), `source` (`cart`) |
 | `save_for_later` | Saved by a signed-in customer | `source` (`product_page` / `cart`) |
 | `begin_checkout` | Checkout opened (Phase 4) | `items`, `subtotal` (paise) |
-| `payment_success` / `payment_failed` | Razorpay result (Phase 4, server-side) | to be confirmed in Phase 4 |
+| `payment_success` | Payment confirmed (logged once by the database, from the browser or the webhook, whichever arrives first) | `order_id`, `total`, `subtotal`, `discount`, `shipping_fee`, `items`, `coupon_used` |
+| `payment_failed` | A payment attempt failed (logged once per attempt) | `order_id`, `total`, `payment_ref` (Razorpay payment id), `reason` (e.g. `payment_failed`) |
 
 Notes for analysis:
 - Quantities in `add_to_cart` / `remove_from_cart` are **changes**, not totals, so net cart

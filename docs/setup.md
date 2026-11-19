@@ -74,6 +74,33 @@ project (the local database already has them set in `supabase/config.toml`).
 To test emails on your laptop, open **http://127.0.0.1:54324** while the local database is running.
 Every email the site sends shows up there instead of going out.
 
+## 5. Switch on payments (Phase 4)
+
+Checkout uses Razorpay. Start in **Test mode**: it looks real, but no money moves.
+
+1. Create a free account at [razorpay.com](https://razorpay.com) and stay in **Test Mode** (toggle at the top).
+2. **API keys:** go to **Account & Settings → API Keys → Generate Test Key**. Copy the Key ID and Key Secret into
+   `.env.local` (and later Vercel) as `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
+3. **Webhook** (so an order is still confirmed if a customer closes the tab right after paying):
+   **Account & Settings → Webhooks → Add New Webhook**
+   - *Webhook URL*: `https://yourscrafts-store.vercel.app/api/webhooks/razorpay`
+   - *Secret*: make up a long random password, and put the same text in `RAZORPAY_WEBHOOK_SECRET`
+   - *Active events*: tick `payment.captured`, `payment.failed` and `order.paid`
+4. Keep **automatic capture** on (Razorpay's default), so payments are captured straight away.
+5. Try it: add something to the cart, check out, and pay with UPI ID `success@razorpay` or card
+   `4111 1111 1111 1111` (any future expiry, any CVV).
+
+**Going live later:** finish Razorpay's KYC, switch to Live Mode, generate **live** keys (`rzp_live_…`), add the
+same webhook in Live Mode, and replace the three values in Vercel.
+
+**How the money is kept safe:** the browser only says *which* items and how many. The server looks up every price,
+the shipping rule and the coupon itself, creates the Razorpay order for that exact total, and checks Razorpay's
+signature before marking anything paid. Stock goes down only after payment is confirmed.
+
+**Unpaid orders:** every time someone presses Pay, an order is saved with `payment_status = pending`. If they
+don't finish, it stays `pending` (or `failed`). These are abandoned checkouts: useful for analysis, but not orders to
+pack. Only **paid** orders get a number like `YCW-2026-00001`.
+
 ## Useful commands
 
 | Command | What it does |

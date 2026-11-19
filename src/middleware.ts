@@ -8,6 +8,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   // Skip static files, images and the analytics/search APIs (they don't need a session refresh).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|brand/|images/|placeholders/|api/events|api/search|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|brand/|images/|placeholders/|api/events|api/search|api/webhooks|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)",
   ],
 };

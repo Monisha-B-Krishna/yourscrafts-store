@@ -1,7 +1,7 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useId, useState, useTransition, type ReactNode } from "react";
+import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDownIcon } from "lucide-react";
 import { Field, FormMessage, SubmitButton, fieldClass } from "@/components/shop/form/field";
@@ -28,8 +28,7 @@ export const EMPTY_ADDRESS: AddressInput = {
 };
 
 /**
- * An Indian delivery address: name, mobile, two address lines, city, state
- * (dropdown) and 6-digit PIN code. Reused by checkout in Phase 4.
+ * Add or edit a saved address (My account → Addresses).
  */
 export function AddressForm({
   initial = EMPTY_ADDRESS,
@@ -51,7 +50,6 @@ export function AddressForm({
   const [pending, startTransition] = useTransition();
   const form = useForm<AddressInput, unknown, Address>({ resolver: zodResolver(addressSchema), defaultValues: initial });
   const { errors } = form.formState;
-  const stateId = useId();
   const defaultId = useId();
 
   const onSubmit = form.handleSubmit((values) =>
@@ -70,83 +68,18 @@ export function AddressForm({
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Full name" autoComplete="shipping name" error={errors.name?.message} {...form.register("name")} />
-        <Field
-          label="Mobile number"
-          type="tel"
-          autoComplete="shipping tel-national"
-          inputMode="tel"
-          prefix="+91"
-          placeholder="98765 43210"
-          hint="The courier may call this number."
-          error={errors.phone?.message}
-          {...form.register("phone")}
-        />
-      </div>
-      <Field
-        label="House / flat number and street"
-        autoComplete="shipping address-line1"
-        error={errors.line1?.message}
-        {...form.register("line1")}
+      <AddressFields
+        register={(name) => form.register(name)}
+        errors={{
+          name: errors.name?.message,
+          phone: errors.phone?.message,
+          line1: errors.line1?.message,
+          line2: errors.line2?.message,
+          city: errors.city?.message,
+          state: errors.state?.message,
+          pincode: errors.pincode?.message,
+        }}
       />
-      <Field
-        label="Area, landmark"
-        optional
-        autoComplete="shipping address-line2"
-        error={errors.line2?.message}
-        {...form.register("line2")}
-      />
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field
-          label="City / town"
-          autoComplete="shipping address-level2"
-          error={errors.city?.message}
-          {...form.register("city")}
-        />
-        <div>
-          <label htmlFor={stateId} className="mb-1.5 block text-sm font-medium text-ink">
-            State
-          </label>
-          <div className="relative">
-            <select
-              id={stateId}
-              autoComplete="shipping address-level1"
-              aria-invalid={errors.state ? true : undefined}
-              aria-describedby={errors.state ? `${stateId}-error` : undefined}
-              className={cn(fieldClass, "appearance-none pr-10")}
-              {...form.register("state")}
-            >
-              <option value="" disabled>
-                Choose…
-              </option>
-              {INDIAN_STATES.map((state) => (
-                <option key={state} value={state}>
-                  {state}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon
-              className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted-ink"
-              aria-hidden="true"
-            />
-          </div>
-          {errors.state && (
-            <p id={`${stateId}-error`} className="mt-1.5 text-sm text-destructive">
-              {errors.state.message}
-            </p>
-          )}
-        </div>
-        <Field
-          label="PIN code"
-          inputMode="numeric"
-          autoComplete="shipping postal-code"
-          maxLength={7}
-          placeholder="560001"
-          error={errors.pincode?.message}
-          {...form.register("pincode")}
-        />
-      </div>
       {showDefaultToggle && defaultLocked && <p className="text-sm text-muted-ink">This is your default address.</p>}
       {showDefaultToggle && !defaultLocked && (
         <div className="flex items-center gap-3">
@@ -176,5 +109,109 @@ export function AddressForm({
         )}
       </div>
     </form>
+  );
+}
+
+export type AddressFieldName = "name" | "phone" | "line1" | "line2" | "city" | "state" | "pincode";
+
+/**
+ * The fields of an Indian delivery address: name, mobile, two address lines,
+ * city, state (dropdown) and 6-digit PIN code. Used by the address book and
+ * by checkout, each with its own form.
+ */
+export function AddressFields({
+  register,
+  errors,
+  nameLabel = "Full name",
+  phoneLabel = "Mobile number",
+  phoneHint = "The courier may call this number.",
+}: {
+  register: (name: AddressFieldName) => UseFormRegisterReturn;
+  errors: Partial<Record<AddressFieldName, string>>;
+  nameLabel?: string;
+  phoneLabel?: string;
+  phoneHint?: ReactNode;
+}) {
+  const stateId = useId();
+  return (
+    <>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label={nameLabel} autoComplete="shipping name" error={errors.name} {...register("name")} />
+        <Field
+          label={phoneLabel}
+          type="tel"
+          autoComplete="shipping tel-national"
+          inputMode="tel"
+          prefix="+91"
+          placeholder="98765 43210"
+          hint={phoneHint}
+          error={errors.phone}
+          {...register("phone")}
+        />
+      </div>
+      <Field
+        label="House / flat number and street"
+        autoComplete="shipping address-line1"
+        error={errors.line1}
+        {...register("line1")}
+      />
+      <Field
+        label="Area, landmark"
+        optional
+        autoComplete="shipping address-line2"
+        error={errors.line2}
+        {...register("line2")}
+      />
+      <div className="grid gap-5 sm:grid-cols-3">
+        <Field
+          label="City / town"
+          autoComplete="shipping address-level2"
+          error={errors.city}
+          {...register("city")}
+        />
+        <div>
+          <label htmlFor={stateId} className="mb-1.5 block text-sm font-medium text-ink">
+            State
+          </label>
+          <div className="relative">
+            <select
+              id={stateId}
+              autoComplete="shipping address-level1"
+              aria-invalid={errors.state ? true : undefined}
+              aria-describedby={errors.state ? `${stateId}-error` : undefined}
+              className={cn(fieldClass, "appearance-none pr-10")}
+              {...register("state")}
+            >
+              <option value="" disabled>
+                Choose…
+              </option>
+              {INDIAN_STATES.map((state) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon
+              className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted-ink"
+              aria-hidden="true"
+            />
+          </div>
+          {errors.state && (
+            <p id={`${stateId}-error`} className="mt-1.5 text-sm text-destructive">
+              {errors.state}
+            </p>
+          )}
+        </div>
+        <Field
+          label="PIN code"
+          inputMode="numeric"
+          autoComplete="shipping postal-code"
+          maxLength={7}
+          placeholder="560001"
+          error={errors.pincode}
+          {...register("pincode")}
+        />
+      </div>
+    </>
   );
 }
